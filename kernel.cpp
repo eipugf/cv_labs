@@ -10,11 +10,6 @@ Kernel::Kernel(int width,int high):width(width),high(high),
 Kernel::Kernel(int width, int high, unique_ptr<float[]> matrix):
     width(width),high(high),matrix(move(matrix)){}
 
-Kernel::Kernel(Kernel && k):width(k.width),high(k.high),matrix(move(k.matrix))
-{
-    k.width = k.high = 0;
-}
-
 Kernel KernelFactory::createGauss(float sigma)
 {
     int kSize = (int)round(sigma * 3);

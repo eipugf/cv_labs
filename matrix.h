@@ -21,7 +21,7 @@ public:
     Matrix();
     Matrix(const int width,const int high);
     Matrix(const int width,const int high, const unique_ptr<float[]> matrix);
-    Matrix(Matrix &&matrix);
+    Matrix(Matrix &&matrix) = default;
 
     int width() const;
     int hight() const;
@@ -30,16 +30,17 @@ public:
     void set(const int i,const int j,const float gray);
 
     Matrix normalize() const;
-    Matrix denormalize() const;
 
     Matrix canvolution(const Kernel & kernel, const Border border = DEFAULT) const;
 
-    float brightness(const int i,const int j,
+    Matrix compute(Matrix & other, function<float(float,float)> & funk) const;
+    Matrix compute(function<float(float)> & funk) const;
+
+    Matrix& operator=(Matrix&& other) = default;
+
+private:
+    float rollElement(const int i,const int j,
                      const Kernel & kernel, const Border border = DEFAULT) const;
-
-    Matrix compute(Matrix &, function<float(float,float)>);
-
-    Matrix& operator=(Matrix&& other);
 };
 
 #endif // MATRIX_H

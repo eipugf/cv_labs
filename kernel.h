@@ -19,7 +19,7 @@ public:
     Kernel();
     Kernel(int width,int high);
     Kernel(int width,int high,unique_ptr<float []>);
-    Kernel(Kernel &&);
+    Kernel(Kernel &&) = default;
 };
 
 //---------------------------------------------------------------

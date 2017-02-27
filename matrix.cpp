@@ -5,12 +5,6 @@ Matrix::Matrix():_width(0),_high(0),matrix(nullptr){}
 Matrix::Matrix(const int width,const int high):
     _width(width),_high(high),matrix(make_unique<float[]>(_width*_high)){}
 
-Matrix::Matrix(Matrix && picture):_width(picture._width),
-    _high(picture._high),matrix(move(picture.matrix))
-{
-    picture._high = picture._width = 0;
-}
-
 int Matrix::width() const{
     return _width;
 }
@@ -41,25 +35,12 @@ void Matrix::set(const int i,const int j,const float gray)
     matrix[i*_high + j] = gray;
 }
 
-
 Matrix Matrix::normalize() const
 {
-    Matrix normalized(_width,_high);
     auto minMax = minmax_element(&matrix[0],&matrix[_width*_high]);
     float range = (*minMax.second - *minMax.first);
-    for(int i = 0; i < _width*_high; i++){
-        normalized.matrix[i] = (matrix[i] - *minMax.first)/range;
-    }
-    return normalized;
-}
-
-Matrix Matrix::denormalize() const
-{
-    Matrix denormalized(_width,_high);
-    for(int i = 0; i<_width*_high; i++){
-        denormalized.matrix[i] = matrix[i]*255.0;
-    }
-    return denormalized;
+    auto funk = Utils::normalize(*minMax.first,range);
+    return compute(funk);
 }
 
 Matrix Matrix::canvolution(const Kernel &kernel, const Border border) const
@@ -67,13 +48,13 @@ Matrix Matrix::canvolution(const Kernel &kernel, const Border border) const
     Matrix processed(_width,_high);
     for(int i = 0; i < _width; i++){
         for(int j = 0; j < _high; j++){
-            processed.set(i,j,brightness(i,j,kernel,border));
+            processed.set(i,j,rollElement(i,j,kernel,border));
         }
     }
     return processed;
 }
 
-float Matrix::brightness(const int elI, const int elJ, const Kernel &k,
+float Matrix::rollElement(const int elI, const int elJ, const Kernel &k,
                          const Border border) const
 {
     float brightness = 0;
@@ -87,20 +68,17 @@ float Matrix::brightness(const int elI, const int elJ, const Kernel &k,
     return brightness;
 }
 
-Matrix Matrix::compute(Matrix &other, function<float (float, float)> funk)
+Matrix Matrix::compute(function<float (float)> &funk) const
 {
     Matrix computed(_width,_high);
-    for(int i = 0; i<_width*_high; i++){
-        computed.matrix[i] = funk(matrix[i],other.matrix[i]);
-    }
+    transform(matrix.get(),matrix.get()+_width*_high,computed.matrix.get(),funk);
     return computed;
 }
 
-Matrix & Matrix::operator=(Matrix &&other)
+Matrix Matrix::compute(Matrix &other, function<float (float, float)> & funk) const
 {
-    _width = other._width;
-    _high = other._high;
-    matrix = move(other.matrix);
-    other._high = other._width = 0;
-    return *this;
+    Matrix computed(_width,_high);
+    transform(matrix.get(),matrix.get()+_width*_high,
+                   other.matrix.get(),computed.matrix.get(),funk);
+    return computed;
 }

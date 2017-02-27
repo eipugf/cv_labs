@@ -1,8 +1,19 @@
 #include "utils.h"
 
-function<float (float, float)> Utils::sqldiff()
+function<float (float, float)> Utils::hypotenuse()
 {
     return [](float x, float y){return sqrt(x*x + y*y);};
+}
+
+function<float (float)> Utils::multiple(float num)
+{
+    return std::bind1st(std::multiplies<float>(),num);
+}
+
+function<float (float)> Utils::normalize(float min, float range)
+{
+    return std::bind([](float a,float b, float c)
+                    {return (a+b)/c;},_1,min,range);
 }
 
 float Utils::gray(byte r, byte g, byte b)

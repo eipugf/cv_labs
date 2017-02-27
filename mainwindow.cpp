@@ -54,7 +54,8 @@ void MainWindow::showImage(QImage &image)
 
 void MainWindow::showPicture(Matrix & img)
 {
-    auto grayMatrix(std::move(img.denormalize()));
+    auto mult = Utils::multiple(255);
+    auto grayMatrix = std::move(img.compute(mult));
     auto image = make_unique<QImage>(img.width(),
                                      img.hight(), QImage::Format_ARGB32);
     for(int i = 0; i < image->width(); i++){
@@ -78,7 +79,8 @@ void MainWindow::on_sobelAction_triggered()
            canvolution(KernelFactory::sobelX(),Matrix::Border::SIMPLE)));
         auto resY(std::move(picture->
            canvolution(KernelFactory::sobelY(),Matrix::Border::SIMPLE)));
-        auto resS(std::move(resX.compute(resY,Utils::sqldiff()).normalize()));
+        auto hyp = Utils::hypotenuse();
+        auto resS(std::move(resX.compute(resY,hyp).normalize()));
         showPicture(resS);
     }
 }
