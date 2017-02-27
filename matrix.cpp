@@ -43,7 +43,7 @@ Matrix Matrix::normalize() const
     return compute(funk);
 }
 
-Matrix Matrix::canvolution(const Kernel &kernel, const Border border) const
+Matrix Matrix::convolution(const Kernel &kernel, const Border border) const
 {
     Matrix processed(_width,_high);
     for(int i = 0; i < _width; i++){

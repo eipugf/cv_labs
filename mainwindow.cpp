@@ -76,9 +76,9 @@ void MainWindow::on_sobelAction_triggered()
 {
     if(picture != nullptr) {
         auto resX(std::move(picture->
-           canvolution(KernelFactory::sobelX(),Matrix::Border::SIMPLE)));
+           convolution(KernelFactory::sobelX(),Matrix::Border::SIMPLE)));
         auto resY(std::move(picture->
-           canvolution(KernelFactory::sobelY(),Matrix::Border::SIMPLE)));
+           convolution(KernelFactory::sobelY(),Matrix::Border::SIMPLE)));
         auto hyp = Utils::hypotenuse();
         auto resS(std::move(resX.compute(resY,hyp).normalize()));
         showPicture(resS);
@@ -89,8 +89,8 @@ void MainWindow::on_gaussAction_triggered()
 {
     if(picture != nullptr) {
         auto resP = std::move(picture->
-           canvolution(KernelFactory::createGaussX(2),Matrix::Border::SIMPLE).
-           canvolution(KernelFactory::createGaussY(2),Matrix::Border::SIMPLE).
+           convolution(KernelFactory::createGaussX(2),Matrix::Border::SIMPLE).
+           convolution(KernelFactory::createGaussY(2),Matrix::Border::SIMPLE).
            normalize());
         showPicture(resP);
     }
