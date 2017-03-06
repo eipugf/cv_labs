@@ -48,13 +48,28 @@ Matrix Matrix::convolution(const Kernel &kernel, const Border border) const
     Matrix processed(_width,_high);
     for(int i = 0; i < _width; i++){
         for(int j = 0; j < _high; j++){
-            processed.set(i,j,rollElement(i,j,kernel,border));
+            processed.set(i,j,convoluite(i,j,kernel,border));
         }
     }
     return processed;
 }
 
-float Matrix::rollElement(const int elI, const int elJ, const Kernel &k,
+Matrix Matrix::compress() const
+{
+    Matrix compresed(_width/2,_high/2);
+    for(int i = 0; i < compresed._width; i++){
+        for(int j = 0; j < compresed._high; j++){
+            float average = (get(i*2,j*2,CILINDER)+
+                            get(i*2+1,j*2,CILINDER)+
+                            get(i*2,j*2+1,CILINDER)+
+                            get(i*2+1,j*2+1,CILINDER))/4.0;
+            compresed.set(i, j, average);
+        }
+    }
+    return compresed;
+}
+
+float Matrix::convoluite(const int elI, const int elJ, const Kernel &k,
                          const Border border) const
 {
     float brightness = 0;
@@ -75,8 +90,10 @@ Matrix Matrix::compute(function<float (float)> &funk) const
     return computed;
 }
 
-Matrix Matrix::compute(Matrix &other, function<float (float, float)> & funk) const
+Matrix Matrix::compute(const Matrix &other,
+                       const function<float (float, float)> & funk) const
 {
+    assert(_width == other._width && _high == other._high);
     Matrix computed(_width,_high);
     transform(matrix.get(),matrix.get()+_width*_high,
                    other.matrix.get(),computed.matrix.get(),funk);

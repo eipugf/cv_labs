@@ -2,9 +2,10 @@
 #define MATRIX_H
 
 #include <algorithm>
-#include <kernel.h>
+#include "kernel.h"
 #include <math.h>
 #include <memory>
+#include <cassert>
 
 using namespace std;
 
@@ -31,15 +32,16 @@ public:
 
     Matrix normalize() const;
 
-    Matrix canvolution(const Kernel & kernel, const Border border = DEFAULT) const;
+    Matrix convolution(const Kernel & kernel, const Border border = DEFAULT) const;
+    Matrix compress() const;
 
-    Matrix compute(Matrix & other, function<float(float,float)> & funk) const;
+    Matrix compute(const Matrix & other,const function<float(float,float)> & funk) const;
     Matrix compute(function<float(float)> & funk) const;
 
     Matrix& operator=(Matrix&& other) = default;
 
 private:
-    float rollElement(const int i,const int j,
+    float convoluite(const int i,const int j,
                      const Kernel & kernel, const Border border = DEFAULT) const;
 };
 

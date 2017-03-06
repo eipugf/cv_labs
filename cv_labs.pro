@@ -20,11 +20,13 @@ SOURCES += main.cpp\
         mainwindow.cpp \
     kernel.cpp \
     matrix.cpp \
-    utils.cpp
+    utils.cpp \
+    scalespace.cpp
 
 HEADERS  += mainwindow.h \
     kernel.h \
     matrix.h \
-    utils.h
+    utils.h \
+    scalespace.h
 
 FORMS    += mainwindow.ui

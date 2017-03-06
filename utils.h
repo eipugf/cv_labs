@@ -24,6 +24,8 @@ public:
 
     static float gauss(float x, float y, float sigma);
     static float gauss(float x, float sigma);
+
+
 };
 
 

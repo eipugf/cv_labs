@@ -13,7 +13,7 @@ function<float (float)> Utils::multiple(float num)
 function<float (float)> Utils::normalize(float min, float range)
 {
     return std::bind([](float a,float b, float c)
-                    {return (a+b)/c;},_1,min,range);
+                    {return (a-b)/c;},_1,min,range);
 }
 
 float Utils::gray(byte r, byte g, byte b)

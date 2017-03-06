@@ -44,6 +44,8 @@
     </property>
     <addaction name="sobelAction"/>
     <addaction name="gaussAction"/>
+    <addaction name="separator"/>
+    <addaction name="scaleSpace"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -80,6 +82,11 @@
   <action name="gaussAction">
    <property name="text">
     <string>Гаусс</string>
+   </property>
+  </action>
+  <action name="scaleSpace">
+   <property name="text">
+    <string>Пирамида</string>
    </property>
   </action>
  </widget>

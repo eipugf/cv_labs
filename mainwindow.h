@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QGraphicsScene>
 #include <QImage>
+#include <string>
 #include <memory>
 #include "matrix.h"
 
@@ -38,10 +39,13 @@ private slots:
 
     void on_gaussAction_triggered();
 
+    void on_scaleSpace_triggered();
+
 private:
     Ui::MainWindow *ui;
 
     void showPicture(Matrix & image);
+    void save(const Matrix & level, const string & file) const;
     void showImage(QImage & image);
 };
 

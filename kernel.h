@@ -33,7 +33,5 @@ public:
     static Kernel createGaussY(float sigma);
     static Kernel sobelX();
     static Kernel sobelY();
-
-    static Kernel testKernell();
 };
 #endif // KERNEL_H

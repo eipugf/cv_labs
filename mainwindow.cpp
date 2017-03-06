@@ -3,6 +3,7 @@
 #include <QFileDialog>
 #include "kernel.h"
 #include "utils.h"
+#include "scalespace.h"
 #include <memory>
 
 #include <time.h>
@@ -88,10 +89,42 @@ void MainWindow::on_sobelAction_triggered()
 void MainWindow::on_gaussAction_triggered()
 {
     if(picture != nullptr) {
-        auto resP = std::move(picture->
-           convolution(KernelFactory::createGaussX(2),Matrix::Border::SIMPLE).
-           convolution(KernelFactory::createGaussY(2),Matrix::Border::SIMPLE).
-           normalize());
+        auto resP = std::move(picture->compress()
+           /*convolution(KernelFactory::createGaussX(0.5),Matrix::Border::CILINDER).
+           convolution(KernelFactory::createGaussY(0.5),Matrix::Border::CILINDER).
+           normalize()*/);
+        save(resP,"/home/eugene/qtprojects/scale_space/1.jpg");
         showPicture(resP);
     }
+}
+
+void MainWindow::on_scaleSpace_triggered()
+{
+    ScaleSpace space = ScaleSpace(*picture,5);
+    auto & octav = space.octavs();
+    for(int i = 0; i < space.numOctavs(); i++){
+        for(int j = 0; j < space.layerSize(); j++){
+            auto & scale = octav[i][j];
+            string fileName = "/home/eugene/qtprojects/scale_space/" +
+                              to_string(i) + "_octave_"+
+                              to_string(j)+"_level_"+to_string(scale.sigma)+".jpg";
+            save(scale.matrix,fileName);
+        }
+    }
+
+}
+
+void MainWindow::save(const Matrix & level, const string & file) const
+{
+    QImage image = QImage(level.width(),level.hight(),
+                          QImage::Format_ARGB32);
+    auto mul255 = Utils::multiple(255);
+    auto pixImage = level.compute(mul255);
+    for(int i = 0; i < pixImage.width(); i++){
+        for(int j = 0; j < pixImage.hight(); j++){
+            float gray = pixImage.get(i,j);
+            image.setPixel(i,j,qRgb(gray, gray, gray));
+        }
+    }
+    image.save(QString(file.c_str()),"JPG");
 }
