@@ -90,10 +90,9 @@ void MainWindow::on_gaussAction_triggered()
 {
     if(picture != nullptr) {
         auto resP = std::move(picture->compress()
-           /*convolution(KernelFactory::createGaussX(0.5),Matrix::Border::CILINDER).
+           .convolution(KernelFactory::createGaussX(0.5),Matrix::Border::CILINDER).
            convolution(KernelFactory::createGaussY(0.5),Matrix::Border::CILINDER).
-           normalize()*/);
-        save(resP,"/home/eugene/qtprojects/scale_space/1.jpg");
+           normalize());
         showPicture(resP);
     }
 }
@@ -102,11 +101,11 @@ void MainWindow::on_scaleSpace_triggered()
 {
     ScaleSpace space = ScaleSpace(*picture,5);
     auto & octav = space.octavs();
-    for(int i = 0; i < space.numOctavs(); i++){
-        for(int j = 0; j < space.layerSize(); j++){
+    for(int i = 0; i < octav.size(); i++){
+        for(int j = 0; j < space.octaveSize(); j++){
             auto & scale = octav[i][j];
             string fileName = "/home/eugene/qtprojects/scale_space/" +
-                              to_string(i) + "_octave_"+
+                              to_string(i) + "_octave_g_"+to_string(scale.efectSigma)+"_"+
                               to_string(j)+"_level_"+to_string(scale.sigma)+".jpg";
             save(scale.matrix,fileName);
         }
