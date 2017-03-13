@@ -21,12 +21,14 @@ SOURCES += main.cpp\
     kernel.cpp \
     matrix.cpp \
     utils.cpp \
-    scalespace.cpp
+    scalespace.cpp \
+    corner_detectors.cpp
 
 HEADERS  += mainwindow.h \
     kernel.h \
     matrix.h \
     utils.h \
-    scalespace.h
+    scalespace.h \
+    corner_detectors.h
 
 FORMS    += mainwindow.ui

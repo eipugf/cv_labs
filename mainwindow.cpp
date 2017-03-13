@@ -5,8 +5,9 @@
 #include "utils.h"
 #include "scalespace.h"
 #include <memory>
-
+#include <QPainter>
 #include <time.h>
+#include <stdio.h>
 
 using namespace std;
 
@@ -33,7 +34,7 @@ void MainWindow::on_openPicture_triggered()
     QString path = QFileDialog::getOpenFileName(
                 this,tr("Open file"),NULL,"JPG/JPEG (*.jpg)");
     if(path.length() > 0){
-        auto image = make_unique<QImage>(path);
+        image = make_unique<QImage>(path);
         picture = make_unique<Matrix>(image->width(),image->height());
         for(int i = 0; i < image->width(); i++){
             for(int j = 0; j < image->height(); j++){
@@ -51,6 +52,24 @@ void MainWindow::showImage(QImage &image)
     scene->clear();
     scene->addPixmap(QPixmap::fromImage(image));
     ui->image->invalidateScene();
+}
+
+void MainWindow::showPoints(vector<Point> &points)
+{
+    QImage sImage = QImage(*image);
+
+    QPainter painter(&sImage);
+    QPen pen;
+    pen.setWidth(3);
+    pen.setColor(Qt::red);
+    painter.setPen(pen);
+
+    for(vector<Point>::iterator p=points.begin(); p!=points.end(); p++){
+        painter.drawPoint(p->x, p->y);
+    }
+
+    painter.end();
+    showImage(sImage);
 }
 
 void MainWindow::showPicture(Matrix & img)
@@ -89,8 +108,8 @@ void MainWindow::on_sobelAction_triggered()
 void MainWindow::on_gaussAction_triggered()
 {
     if(picture != nullptr) {
-        auto resP = std::move(picture->compress()
-           .convolution(KernelFactory::createGaussX(0.5),Matrix::Border::CILINDER).
+        auto resP = std::move(
+           picture->convolution(KernelFactory::createGaussX(0.5),Matrix::Border::CILINDER).
            convolution(KernelFactory::createGaussY(0.5),Matrix::Border::CILINDER).
            normalize());
         showPicture(resP);
@@ -105,8 +124,8 @@ void MainWindow::on_scaleSpace_triggered()
         for(int j = 0; j < space.octaveSize(); j++){
             auto & scale = octav[i][j];
             string fileName = "/home/eugene/qtprojects/scale_space/" +
-                              to_string(i) + "_octave_g_"+to_string(scale.efectSigma)+"_"+
-                              to_string(j)+"_level_"+to_string(scale.sigma)+".jpg";
+                 to_string(i) + "_octave_g_"+to_string(scale.efectSigma)+"_"+
+                 to_string(j)+"_level_"+to_string(scale.sigma)+".jpg";
             save(scale.matrix,fileName);
         }
     }
@@ -126,4 +145,22 @@ void MainWindow::save(const Matrix & level, const string & file) const
         }
     }
     image.save(QString(file.c_str()),"JPG");
+}
+
+void MainWindow::on_action_triggered()
+{
+    if(picture!=NULL){
+        auto points = CornerDetectors().detect(*picture,Algorithm::MORAVEC);
+        points = PointFileter(picture->width()*picture->hight(),150).filter(points);
+        showPoints(points);
+    }
+}
+
+void MainWindow::on_haris_triggered()
+{
+    if(picture!=NULL){
+        auto points = CornerDetectors().detect(*picture,Algorithm::HARIS);
+        points = PointFileter(picture->width()*picture->hight(),150).filter(points);
+        showPoints(points);
+    }
 }

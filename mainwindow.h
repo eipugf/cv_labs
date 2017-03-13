@@ -7,6 +7,8 @@
 #include <string>
 #include <memory>
 #include "matrix.h"
+#include "corner_detectors.h"
+#include <vector>
 
 using namespace std;
 
@@ -19,6 +21,8 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
     unique_ptr<Matrix> picture;
+
+    unique_ptr<QImage> image;
 
     QGraphicsScene * scene = new QGraphicsScene(this);
 
@@ -41,12 +45,18 @@ private slots:
 
     void on_scaleSpace_triggered();
 
+    void on_action_triggered();
+
+    void on_haris_triggered();
+
 private:
     Ui::MainWindow *ui;
 
     void showPicture(Matrix & image);
     void save(const Matrix & level, const string & file) const;
     void showImage(QImage & image);
+
+    void showPoints(vector<Point> & points);
 };
 
 #endif // MAINWINDOW_H
