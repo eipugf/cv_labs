@@ -12,13 +12,13 @@ struct Kernel
 {
 public:
     int width;
-    int high;
+    int height;
     unique_ptr<float []> matrix;
 
 public:
     Kernel();
-    Kernel(int width,int high);
-    Kernel(int width,int high,unique_ptr<float []>);
+    Kernel(int width,int height);
+    Kernel(int width,int height,unique_ptr<float []>);
     Kernel(Kernel &&) = default;
 };
 

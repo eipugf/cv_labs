@@ -1,36 +1,41 @@
 #include "corner_detectors.h"
-
+#include <stdio.h>
 CornerDetectors::CornerDetectors(){}
 
 vector<Point> CornerDetectors::detect(const Matrix &m,
                                       const Algorithm alg) const
 {
     Matrix matrix;
+    float tr;
     switch (alg) {
     case MORAVEC:
         matrix = std::move(detectMoravec(m));
+        tr = trasholdMor;
         break;
     case HARIS:
         matrix = std::move(detectHaris(m));
+        tr = trasholdHar;
     default:
         break;
     }
-    return localMinimums(matrix);
+    return localMinimums(matrix, tr);
 }
 
 Matrix CornerDetectors::detectMoravec(const Matrix &m) const
 {
-    auto errors = Matrix(m.width(),m.hight());
+    auto errors = Matrix(m.width(),m.height());
     for(int i = 0; i<m.width(); i++){
-        for(int j = 0; j<m.hight(); j++){
-            float min = std::numeric_limits<int>::max();
+        for(int j = 0; j<m.height(); j++){
+            float min = std::numeric_limits<float>::max();
             for(int u = -1; u <= 1; u++){
                 for(int v = -1; v <= 1; v++){
+                    if(!(u || v))
+                        continue;
                     float err = 0;
-                    for(int dx = -winSize; dx < winSize; dx++){
-                        for(int dy = -winSize; dy < winSize; dy++){
-                            err += pow(m.get(i+u,j+v,Matrix::Border::COPIED) -
-                                       m.get(i+u+dx,j+v+dy,Matrix::Border::COPIED),2);
+                    for(int dx = -winSize; dx <= winSize; dx++){
+                        for(int dy = -winSize; dy <= winSize; dy++){
+                            err += pow(m.get(i+u+dx,j+v+dy,Matrix::Border::COPIED) -
+                                   m.get(i+dx,j+dy,Matrix::Border::COPIED),2);
                         }
                     }
                     min = std::min(min, err);
@@ -44,19 +49,19 @@ Matrix CornerDetectors::detectMoravec(const Matrix &m) const
 
 Matrix CornerDetectors::detectHaris(const Matrix &m) const
 {
-    auto lambdas = Matrix(m.width(),m.hight());
+    auto lambdas = Matrix(m.width(),m.height());
     auto derX = m.convolution(KernelFactory::sobelX(),Matrix::Border::SIMPLE);
     auto derY = m.convolution(KernelFactory::sobelY(),Matrix::Border::SIMPLE);
     auto w = KernelFactory::createGauss(sigma);
     int wSize = w.width/2;
     for(int i = 0; i < lambdas.width(); i++){
-        for(int j = 0; j < lambdas.hight(); j++){
+        for(int j = 0; j < lambdas.height(); j++){
             float A = 0, B = 0, C = 0;
-            for(int v = 0; v < w.high; v++){
+            for(int v = 0; v < w.height; v++){
                 for(int u = 0; u < w.width; u++){
                     float Ix = derX.get(i+u-wSize, j+v-wSize, Matrix::Border::SIMPLE);
                     float Iy = derY.get(i+u-wSize, j+v-wSize, Matrix::Border::SIMPLE);
-                    float k = w.matrix[u*w.high+v];
+                    float k = w.matrix[u*w.height+v];
                     A += k*Ix*Ix;
                     B += k*Ix*Iy;
                     C += k*Iy*Iy;
@@ -69,29 +74,32 @@ Matrix CornerDetectors::detectHaris(const Matrix &m) const
     return lambdas;
 }
 
-vector<Point> CornerDetectors::localMinimums(const Matrix &m) const
+vector<Point> CornerDetectors::localMinimums(const Matrix &m, const float tr) const
 {
     vector<Point> points;
     for(int i = 0; i < m.width(); i++){
-        for(int j = 0; j < m.hight(); j++){
-            if(m.get(i, j) < trashold)
-                continue;
-            bool foundMore = false;
-            for(int k = -pSize; k < pSize && !foundMore; k++){
-                for(int t = -pSize; t < pSize && !foundMore; t++){
-                    if(k == 0 || t == 0)
-                        continue;
-                    if(m.get(i+k,j+t,Matrix::Border::SIMPLE) - m.get(i,j) > E){
-                        foundMore = true;
-                    }
-                }
-            }
-            if(foundMore)
-                continue;
-            points.emplace_back(move(Point(i, j, m.get(i,j))));
+        for(int j = 0; j < m.height(); j++){
+            if(isMinimum(m, i, j, tr))
+                points.emplace_back(move(Point(i, j, m.get(i,j))));
         }
     }
     return points;
+}
+
+bool CornerDetectors::isMinimum(const Matrix &m, const int i,
+                                const int j, const float tr) const
+{
+    const auto value = m.get(i, j);
+    if(value < tr)
+        return false;
+    for(int k = -pSize; k < pSize; k++){
+        for(int t = -pSize; t < pSize; t++){
+            if(m.get(i+k,j+t,Matrix::Border::SIMPLE) - value > E){
+                return false;
+            }
+        }
+    }
+    return true;
 }
 
 PointFileter::PointFileter(const int maxR, const int maxPoints):

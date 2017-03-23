@@ -26,9 +26,10 @@ class CornerDetectors
     const float E = 1e-5;
     const float sigma = 1;
 
-    const float trashold = 0.2;
+    const float trasholdMor = 0.05;
+    const float trasholdHar = 0.25;
     const int winSize = 3;
-    const int pSize = 7;
+    const int pSize = 3;
 
 public:
     CornerDetectors();
@@ -37,11 +38,12 @@ public:
 private:
     Matrix detectMoravec(const Matrix & m) const;
     Matrix detectHaris(const Matrix & m) const;
-    vector<Point> localMinimums(const Matrix & m) const;
+    vector<Point> localMinimums(const Matrix & m, const float tr) const;
+    bool isMinimum(const Matrix & m,const int i,const int j, const float tr) const;
 };
 
 class PointFileter{
-    const float factor = 0.4;
+    const float factor = 0.9;
     int maxR;
     int maxPoints;
 

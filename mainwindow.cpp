@@ -8,6 +8,7 @@
 #include <QPainter>
 #include <time.h>
 #include <stdio.h>
+#include "kdthree.h"
 
 using namespace std;
 
@@ -77,7 +78,7 @@ void MainWindow::showPicture(Matrix & img)
     auto mult = Utils::multiple(255);
     auto grayMatrix = std::move(img.compute(mult));
     auto image = make_unique<QImage>(img.width(),
-                                     img.hight(), QImage::Format_ARGB32);
+                                     img.height(), QImage::Format_ARGB32);
     for(int i = 0; i < image->width(); i++){
         for(int j = 0; j < image->height(); j++){
             byte gray = grayMatrix.get(i,j);
@@ -85,6 +86,37 @@ void MainWindow::showPicture(Matrix & img)
         }
     }
     showImage(*image);
+}
+
+
+void MainWindow::showPictureWithPoints(Matrix & img,
+                                       vector<pair<Point,Point>> & pairs)
+{
+    auto mult = Utils::multiple(255);
+    auto grayMatrix = std::move(img.compute(mult));
+    auto image = QImage(img.width(),img.height(), QImage::Format_ARGB32);
+    for(int i = 0; i < image.width(); i++){
+        for(int j = 0; j < image.height(); j++){
+            byte gray = grayMatrix.get(i,j);
+            image.setPixel(i,j,qRgb(gray,gray,gray));
+        }
+    }
+
+    QPainter painter(&image);
+    QPen pen;
+    pen.setWidth(2);
+    pen.setColor(Qt::red);
+    painter.setPen(pen);
+
+    for(auto &each:pairs){
+        Point p1 = each.first;
+        Point p2 = each.second;
+        painter.drawLine(p1.x, p1.y,p2.x+image.width()/2, p2.y);
+    }
+
+    painter.end();
+
+    showImage(image);
 }
 
 void MainWindow::on_savePicture_triggered()
@@ -134,12 +166,12 @@ void MainWindow::on_scaleSpace_triggered()
 
 void MainWindow::save(const Matrix & level, const string & file) const
 {
-    QImage image = QImage(level.width(),level.hight(),
+    QImage image = QImage(level.width(),level.height(),
                           QImage::Format_ARGB32);
     auto mul255 = Utils::multiple(255);
     auto pixImage = level.compute(mul255);
     for(int i = 0; i < pixImage.width(); i++){
-        for(int j = 0; j < pixImage.hight(); j++){
+        for(int j = 0; j < pixImage.height(); j++){
             float gray = pixImage.get(i,j);
             image.setPixel(i,j,qRgb(gray, gray, gray));
         }
@@ -147,11 +179,12 @@ void MainWindow::save(const Matrix & level, const string & file) const
     image.save(QString(file.c_str()),"JPG");
 }
 
+
 void MainWindow::on_action_triggered()
 {
     if(picture!=NULL){
         auto points = CornerDetectors().detect(*picture,Algorithm::MORAVEC);
-        points = PointFileter(picture->width()*picture->hight(),150).filter(points);
+        points = PointFileter(picture->width()*picture->height(),150).filter(points);
         showPoints(points);
     }
 }
@@ -160,7 +193,25 @@ void MainWindow::on_haris_triggered()
 {
     if(picture!=NULL){
         auto points = CornerDetectors().detect(*picture,Algorithm::HARIS);
-        points = PointFileter(picture->width()*picture->hight(),150).filter(points);
+        points = PointFileter(picture->width()*picture->height(),150).filter(points);
         showPoints(points);
+    }
+}
+
+void MainWindow::on_simpleCompareAction_triggered()
+{
+    if(picture!=NULL){
+        auto pictures = Matrix(picture->width()*2, picture->height());
+        for(int i = 0; i<picture->width(); i++){
+            for(int j = 0; j<picture->height(); j++){
+                pictures.set(i,j,picture->get(i,j));
+                pictures.set(i+picture->width(),j,picture->get(i,j));
+            }
+        }
+
+        auto pairs = CommonPoints().findSamePoints(*picture,*picture);
+
+
+        showPictureWithPoints(pictures,pairs);
     }
 }

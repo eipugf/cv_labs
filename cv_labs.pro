@@ -22,13 +22,17 @@ SOURCES += main.cpp\
     matrix.cpp \
     utils.cpp \
     scalespace.cpp \
-    corner_detectors.cpp
+    corner_detectors.cpp \
+    descriptor.cpp \
+    kdthree.cpp
 
 HEADERS  += mainwindow.h \
     kernel.h \
     matrix.h \
     utils.h \
     scalespace.h \
-    corner_detectors.h
+    corner_detectors.h \
+    descriptor.h \
+    kdthree.h
 
 FORMS    += mainwindow.ui

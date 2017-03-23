@@ -49,12 +49,15 @@ private slots:
 
     void on_haris_triggered();
 
+    void on_simpleCompareAction_triggered();
+
 private:
     Ui::MainWindow *ui;
 
     void showPicture(Matrix & image);
     void save(const Matrix & level, const string & file) const;
     void showImage(QImage & image);
+    void showPictureWithPoints(Matrix & img,vector<pair<Point,Point>> & pairs);
 
     void showPoints(vector<Point> & points);
 };

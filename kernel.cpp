@@ -2,13 +2,13 @@
 #include <stdio.h>
 
 
-Kernel::Kernel():width(0),high(0),matrix(nullptr){}
+Kernel::Kernel():width(0),height(0),matrix(nullptr){}
 
-Kernel::Kernel(int width,int high):width(width),high(high),
-    matrix(make_unique<float []>(width*high)){}
+Kernel::Kernel(int width,int height):width(width),height(height),
+    matrix(make_unique<float []>(width*height)){}
 
-Kernel::Kernel(int width, int high, unique_ptr<float[]> matrix):
-    width(width),high(high),matrix(move(matrix)){}
+Kernel::Kernel(int width, int height, unique_ptr<float[]> matrix):
+    width(width),height(height),matrix(move(matrix)){}
 
 Kernel KernelFactory::createGauss(float sigma)
 {
@@ -42,7 +42,7 @@ Kernel KernelFactory::createGaussX(float sigma)
 Kernel KernelFactory::createGaussY(float sigma)
 {
     Kernel kernel = createGaussX(sigma);
-    swap(kernel.high,kernel.width);
+    swap(kernel.height,kernel.width);
     return kernel;
 }
 

@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>759</width>
-    <height>480</height>
+    <height>617</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -49,8 +49,15 @@
     <addaction name="action"/>
     <addaction name="haris"/>
    </widget>
+   <widget class="QMenu" name="menu_3">
+    <property name="title">
+     <string>Сравнение</string>
+    </property>
+    <addaction name="simpleCompareAction"/>
+   </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
+   <addaction name="menu_3"/>
   </widget>
   <widget class="QToolBar" name="mainToolBar">
    <attribute name="toolBarArea">
@@ -99,6 +106,11 @@
   <action name="haris">
    <property name="text">
     <string>Харис</string>
+   </property>
+  </action>
+  <action name="simpleCompareAction">
+   <property name="text">
+    <string>Простое сравнение</string>
    </property>
   </action>
  </widget>
