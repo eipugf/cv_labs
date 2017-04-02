@@ -7,29 +7,39 @@ using namespace std;
 struct Descriptor{
     int x;
     int y;
-    vector<float> data;
+    vector<double> data;
     Descriptor(const int x,const int y);
-    Descriptor(const int x, const int y, const vector<float> & data);
+    Descriptor(const int x, const int y, const vector<double> & data);
 };
 
 
 class DescrBuilder{
-    const float treshold = 0.2;
-    const float sigma = 2;
+    const double treshold = 0.2;
+    const double sigma = 2.0;
 
     const int sizeArea = 16;
     const int sizeHist = 4;
-    const int numBeans = 8;
+    const int numBins = 8;
 
 public:
     vector<Descriptor> build(const Matrix & m) const;
 
 private:
-    vector<float> computeData(const Point &p,
+    vector<double> computeData(const Point &p,
                    const Matrix & sobelX, const Matrix & sobelY) const;
 
     Descriptor filterTrash(const Descriptor &descr) const;
     Descriptor normilize(const Descriptor & descr) const;
 };
+
+class PointSearcher{
+
+    const double eps = 0.05;
+
+public:
+    vector<pair<Point,Point>> findSamePoints( const Matrix &m1,const Matrix &m2) const;
+};
+
+
 
 #endif // DESCRIPTOR_H

@@ -13,7 +13,7 @@ class Matrix
 {
     int _width;
     int _height;
-    unique_ptr<float[]> matrix;
+    unique_ptr<double[]> matrix;
 
 public:
 
@@ -21,27 +21,27 @@ public:
 
     Matrix();
     Matrix(const int width,const int height);
-    Matrix(const int width,const int height, const unique_ptr<float[]> matrix);
+    Matrix(const int width,const int height, const unique_ptr<double[]> matrix);
     Matrix(Matrix &&matrix) = default;
 
     int width() const;
     int height() const;
 
-    float get(const int i,const int j,const Border border = DEFAULT) const;
-    void set(const int i,const int j,const float gray);
+    double get(const int i,const int j,const Border border = DEFAULT) const;
+    void set(const int i,const int j,const double gray);
 
     Matrix normalize() const;
 
     Matrix convolution(const Kernel & kernel, const Border border = DEFAULT) const;
     Matrix compress() const;
 
-    Matrix compute(const Matrix & other,const function<float(float,float)> & funk) const;
-    Matrix compute(function<float(float)> & funk) const;
+    Matrix compute(const Matrix & other,const function<double(double,double)> & funk) const;
+    Matrix compute(function<double(double)> & funk) const;
 
     Matrix& operator=(Matrix&& other) = default;
 
 private:
-    float convoluite(const int i,const int j,
+    double convoluite(const int i,const int j,
                      const Kernel & kernel, const Border border = DEFAULT) const;
 };
 

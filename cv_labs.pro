@@ -8,9 +8,6 @@ QT       += core gui
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
-QMAKE_CXXFLAGS+= -fopenmp
-QMAKE_LFLAGS+= -fopenmp
-
 TARGET = cv_labs
 TEMPLATE = app
 
@@ -23,8 +20,7 @@ SOURCES += main.cpp\
     utils.cpp \
     scalespace.cpp \
     corner_detectors.cpp \
-    descriptor.cpp \
-    kdthree.cpp
+    descriptor.cpp
 
 HEADERS  += mainwindow.h \
     kernel.h \
@@ -32,7 +28,6 @@ HEADERS  += mainwindow.h \
     utils.h \
     scalespace.h \
     corner_detectors.h \
-    descriptor.h \
-    kdthree.h
+    descriptor.h
 
 FORMS    += mainwindow.ui

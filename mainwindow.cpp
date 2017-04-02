@@ -8,7 +8,7 @@
 #include <QPainter>
 #include <time.h>
 #include <stdio.h>
-#include "kdthree.h"
+#include "descriptor.h"
 
 using namespace std;
 
@@ -33,7 +33,7 @@ void MainWindow::on_close_triggered()
 void MainWindow::on_openPicture_triggered()
 {
     QString path = QFileDialog::getOpenFileName(
-                this,tr("Open file"),NULL,"JPG/JPEG (*.jpg)");
+                this,tr("Open file"),NULL,"PNG (*.png)");
     if(path.length() > 0){
         image = make_unique<QImage>(path);
         picture = make_unique<Matrix>(image->width(),image->height());
@@ -47,6 +47,8 @@ void MainWindow::on_openPicture_triggered()
         showImage(*image);
     }
 }
+
+
 
 void MainWindow::showImage(QImage &image)
 {
@@ -89,20 +91,20 @@ void MainWindow::showPicture(Matrix & img)
 }
 
 
-void MainWindow::showPictureWithPoints(Matrix & img,
+void MainWindow::showPictureWithPoints(QImage & img,
                                        vector<pair<Point,Point>> & pairs)
 {
-    auto mult = Utils::multiple(255);
-    auto grayMatrix = std::move(img.compute(mult));
-    auto image = QImage(img.width(),img.height(), QImage::Format_ARGB32);
-    for(int i = 0; i < image.width(); i++){
-        for(int j = 0; j < image.height(); j++){
-            byte gray = grayMatrix.get(i,j);
-            image.setPixel(i,j,qRgb(gray,gray,gray));
-        }
-    }
+//    auto mult = Utils::multiple(255);
+//    auto grayMatrix = std::move(img.compute(mult));
+//    auto image = QImage(img.width(),img.height(), QImage::Format_ARGB32);
+//    for(int i = 0; i < image.width(); i++){
+//        for(int j = 0; j < image.height(); j++){
+//            byte gray = grayMatrix.get(i,j);
+//            image.setPixel(i,j,qRgb(gray,gray,gray));
+//        }
+//    }
 
-    QPainter painter(&image);
+    QPainter painter(&img);
     QPen pen;
     pen.setWidth(2);
     pen.setColor(Qt::red);
@@ -111,12 +113,27 @@ void MainWindow::showPictureWithPoints(Matrix & img,
     for(auto &each:pairs){
         Point p1 = each.first;
         Point p2 = each.second;
-        painter.drawLine(p1.x, p1.y,p2.x+image.width()/2, p2.y);
+        painter.drawLine(p1.x, p1.y,p2.x+img.width()/2, p2.y);
     }
 
     painter.end();
 
-    showImage(image);
+    showImage(img);
+}
+
+Matrix MainWindow::imageToMatrix(QImage &image)
+{
+    Matrix m = Matrix(image.width(),image.height());
+
+    for(int i = 0; i<image.width(); i++){
+        for(int j = 0; j < image.height(); j++){
+            m.set(i,j,Utils::gray(qRed(image.pixel(i,j)),
+                                   qGreen(image.pixel(i,j)),
+                                   qBlue(image.pixel(i,j))));
+        }
+    }
+
+    return m;
 }
 
 void MainWindow::on_savePicture_triggered()
@@ -172,7 +189,7 @@ void MainWindow::save(const Matrix & level, const string & file) const
     auto pixImage = level.compute(mul255);
     for(int i = 0; i < pixImage.width(); i++){
         for(int j = 0; j < pixImage.height(); j++){
-            float gray = pixImage.get(i,j);
+            double gray = pixImage.get(i,j);
             image.setPixel(i,j,qRgb(gray, gray, gray));
         }
     }
@@ -193,25 +210,28 @@ void MainWindow::on_haris_triggered()
 {
     if(picture!=NULL){
         auto points = CornerDetectors().detect(*picture,Algorithm::HARIS);
-        points = PointFileter(picture->width()*picture->height(),150).filter(points);
+        points = PointFileter(picture->width()*picture->height(),30).filter(points);
         showPoints(points);
     }
 }
 
 void MainWindow::on_simpleCompareAction_triggered()
 {
-    if(picture!=NULL){
-        auto pictures = Matrix(picture->width()*2, picture->height());
-        for(int i = 0; i<picture->width(); i++){
-            for(int j = 0; j<picture->height(); j++){
-                pictures.set(i,j,picture->get(i,j));
-                pictures.set(i+picture->width(),j,picture->get(i,j));
-            }
+    QImage image0 = QImage("/home/eugene/giraph.png");
+    QImage image1 = QImage("/home/eugene/giraph1.png");
+
+    Matrix m0 = imageToMatrix(image0);
+    Matrix m1 = imageToMatrix(image1);
+    auto pairs = PointSearcher().findSamePoints(m0,m1);
+
+    QImage pictures = QImage(m0.width()*2, m0.height(),QImage::Format_ARGB32);
+    for(int i = 0; i<m0.width(); i++){
+        for(int j = 0; j<m0.height(); j++){
+            pictures.setPixel(i,j,image0.pixel(i,j));
+            pictures.setPixel(i+image1.width(),j,image1.pixel(i,j));
         }
-
-        auto pairs = CommonPoints().findSamePoints(*picture,*picture);
-
-
-        showPictureWithPoints(pictures,pairs);
     }
+
+    showPictureWithPoints(pictures,pairs);
+
 }

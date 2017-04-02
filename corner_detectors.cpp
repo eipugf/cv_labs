@@ -6,7 +6,7 @@ vector<Point> CornerDetectors::detect(const Matrix &m,
                                       const Algorithm alg) const
 {
     Matrix matrix;
-    float tr;
+    double tr;
     switch (alg) {
     case MORAVEC:
         matrix = std::move(detectMoravec(m));
@@ -26,12 +26,12 @@ Matrix CornerDetectors::detectMoravec(const Matrix &m) const
     auto errors = Matrix(m.width(),m.height());
     for(int i = 0; i<m.width(); i++){
         for(int j = 0; j<m.height(); j++){
-            float min = std::numeric_limits<float>::max();
+            double min = std::numeric_limits<double>::max();
             for(int u = -1; u <= 1; u++){
                 for(int v = -1; v <= 1; v++){
                     if(!(u || v))
                         continue;
-                    float err = 0;
+                    double err = 0;
                     for(int dx = -winSize; dx <= winSize; dx++){
                         for(int dy = -winSize; dy <= winSize; dy++){
                             err += pow(m.get(i+u+dx,j+v+dy,Matrix::Border::COPIED) -
@@ -56,25 +56,25 @@ Matrix CornerDetectors::detectHaris(const Matrix &m) const
     int wSize = w.width/2;
     for(int i = 0; i < lambdas.width(); i++){
         for(int j = 0; j < lambdas.height(); j++){
-            float A = 0, B = 0, C = 0;
+            double A = 0, B = 0, C = 0;
             for(int v = 0; v < w.height; v++){
                 for(int u = 0; u < w.width; u++){
-                    float Ix = derX.get(i+u-wSize, j+v-wSize, Matrix::Border::SIMPLE);
-                    float Iy = derY.get(i+u-wSize, j+v-wSize, Matrix::Border::SIMPLE);
-                    float k = w.matrix[u*w.height+v];
+                    double Ix = derX.get(i+u-wSize, j+v-wSize, Matrix::Border::SIMPLE);
+                    double Iy = derY.get(i+u-wSize, j+v-wSize, Matrix::Border::SIMPLE);
+                    double k = w.matrix[u*w.height+v];
                     A += k*Ix*Ix;
                     B += k*Ix*Iy;
                     C += k*Iy*Iy;
                 }
             }
-            float descr = std::sqrt(std::pow(A-C,2) + 4*B*B);
+            double descr = std::sqrt(std::pow(A-C,2) + 4*B*B);
             lambdas.set(i, j, std::min(abs((A+C-descr)/2),abs((A+C+descr)/2)));
         }
     }
     return lambdas;
 }
 
-vector<Point> CornerDetectors::localMinimums(const Matrix &m, const float tr) const
+vector<Point> CornerDetectors::localMinimums(const Matrix &m, const double tr) const
 {
     vector<Point> points;
     for(int i = 0; i < m.width(); i++){
@@ -87,7 +87,7 @@ vector<Point> CornerDetectors::localMinimums(const Matrix &m, const float tr) co
 }
 
 bool CornerDetectors::isMinimum(const Matrix &m, const int i,
-                                const int j, const float tr) const
+                                const int j, const double tr) const
 {
     const auto value = m.get(i, j);
     if(value < tr)

@@ -57,8 +57,8 @@ private:
     void showPicture(Matrix & image);
     void save(const Matrix & level, const string & file) const;
     void showImage(QImage & image);
-    void showPictureWithPoints(Matrix & img,vector<pair<Point,Point>> & pairs);
-
+    void showPictureWithPoints(QImage & img,vector<pair<Point,Point>> & pairs);
+    Matrix imageToMatrix(QImage & image);
     void showPoints(vector<Point> & points);
 };
 

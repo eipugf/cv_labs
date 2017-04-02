@@ -5,12 +5,12 @@
 Kernel::Kernel():width(0),height(0),matrix(nullptr){}
 
 Kernel::Kernel(int width,int height):width(width),height(height),
-    matrix(make_unique<float []>(width*height)){}
+    matrix(make_unique<double []>(width*height)){}
 
-Kernel::Kernel(int width, int height, unique_ptr<float[]> matrix):
+Kernel::Kernel(int width, int height, unique_ptr<double[]> matrix):
     width(width),height(height),matrix(move(matrix)){}
 
-Kernel KernelFactory::createGauss(float sigma)
+Kernel KernelFactory::createGauss(double sigma)
 {
     int kSize = (int)round(sigma * 3);
     Kernel kernel(kSize * 2 + 1,kSize * 2 + 1);
@@ -23,12 +23,12 @@ Kernel KernelFactory::createGauss(float sigma)
     return kernel;
 }
 
-Kernel KernelFactory::createGaussX(float sigma)
+Kernel KernelFactory::createGaussX(double sigma)
 {
     int kSize = (int) round(sigma * 3);
     Kernel kernel(kSize*2+1,1);
     int idx = 0;
-    float sum = 0;
+    double sum = 0;
     for(int i = -kSize; i <= kSize; i++){
         kernel.matrix[idx++] = Utils::gauss(i,sigma);
         sum += kernel.matrix[idx - 1];
@@ -39,7 +39,7 @@ Kernel KernelFactory::createGaussX(float sigma)
     return kernel;
 }
 
-Kernel KernelFactory::createGaussY(float sigma)
+Kernel KernelFactory::createGaussY(double sigma)
 {
     Kernel kernel = createGaussX(sigma);
     swap(kernel.height,kernel.width);
@@ -48,10 +48,10 @@ Kernel KernelFactory::createGaussY(float sigma)
 
 Kernel KernelFactory::sobelX()
 {
-    return Kernel(3,3,unique_ptr<float[]>(new float[9]{-1,0,1,-2,0,2,-1,0,1}));
+    return Kernel(3,3,unique_ptr<double[]>(new double[9]{-1,0,1,-2,0,2,-1,0,1}));
 }
 
 Kernel KernelFactory::sobelY()
 {
-    return Kernel(3,3,unique_ptr<float[]>(new float[9]{-1,-2,-1,0,0,0,1,2,1}));
+    return Kernel(3,3,unique_ptr<double[]>(new double[9]{-1,-2,-1,0,0,0,1,2,1}));
 }

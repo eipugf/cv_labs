@@ -1,32 +1,32 @@
 #include "utils.h"
 
-function<float (float, float)> Utils::hypotenuse()
+function<double (double, double)> Utils::hypotenuse()
 {
-    return [](float x, float y){return sqrt(x*x + y*y);};
+    return [](double x, double y){return sqrt(x*x + y*y);};
 }
 
-function<float (float)> Utils::multiple(float num)
+function<double (double)> Utils::multiple(double num)
 {
-    return std::bind1st(std::multiplies<float>(),num);
+    return std::bind1st(std::multiplies<double>(),num);
 }
 
-function<float (float)> Utils::normalize(float min, float range)
+function<double (double)> Utils::normalize(double min, double range)
 {
-    return std::bind([](float a,float b, float c)
+    return std::bind([](double a,double b, double c)
     {return (a-b)/c;},_1,min,range);
 }
 
-float Utils::gray(byte r, byte g, byte b)
+double Utils::gray(byte r, byte g, byte b)
 {
-    return (r*0.299 + g*0.587 + b*0.114) / 255.0;
+    return (r*0.299 + g*0.587 + b*0.114)/255.0;
 }
 
-float Utils::gauss(float x, float y, float sigma)
+double Utils::gauss(double x, double y, double sigma)
 {
     return exp(-(x*x+y*y)/(2*sigma*sigma)) / 2 * M_PI * sigma * sigma;
 }
 
-float Utils::gauss(float x, float sigma)
+double Utils::gauss(double x, double sigma)
 {
     return exp(-x*x/(2*sigma*sigma)) / sqrt(2 * M_PI) * sigma;
 }

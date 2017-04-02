@@ -18,7 +18,7 @@ const vector<vector<ScaleSpace::ScaleLevel> > &ScaleSpace::octavs() const
 }
 
 
-Matrix ScaleSpace::gauss(const Matrix &matrix,const float sigma) const
+Matrix ScaleSpace::gauss(const Matrix &matrix,const double sigma) const
 {
     return matrix
            .convolution(KernelFactory::createGaussX(sigma),Matrix::Border::CILINDER)
@@ -45,7 +45,7 @@ void ScaleSpace::calculate(const Matrix & m)
                 auto &prevL = _octavs[i][j - 1];
                 level.sigma = k * prevL.sigma;
                 level.efectSigma = k * prevL.efectSigma;
-                float delta = sqrt(pow(level.sigma, 2) - pow(prevL.sigma, 2));
+                double delta = sqrt(pow(level.sigma, 2) - pow(prevL.sigma, 2));
                 level.matrix = move(gauss(prevL.matrix, delta));
             }
             _octavs[i].emplace_back(move(level));

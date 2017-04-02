@@ -14,16 +14,16 @@ class Utils
 {
 public:
 
-    static function<float(float,float)> hypotenuse();
+    static function<double(double,double)> hypotenuse();
 
-    static function<float(float)> multiple(float num);
+    static function<double(double)> multiple(double num);
 
-    static function<float(float)> normalize(float min, float range);
+    static function<double(double)> normalize(double min, double range);
 
-    static float gray(byte r, byte g, byte b);
+    static double gray(byte r, byte g, byte b);
 
-    static float gauss(float x, float y, float sigma);
-    static float gauss(float x, float sigma);
+    static double gauss(double x, double y, double sigma);
+    static double gauss(double x, double sigma);
 
 
 };
