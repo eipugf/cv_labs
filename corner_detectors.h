@@ -24,7 +24,7 @@ enum Algorithm {MORAVEC, HARIS};
 class CornerDetectors
 {
     const double E = 1e-5;
-    const double sigma = 1;
+    const double sigma = 1.6;
 
     const double trasholdMor = 0.05;
     const double trasholdHar = 0.25;

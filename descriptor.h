@@ -17,27 +17,38 @@ class DescrBuilder{
     const double treshold = 0.2;
     const double sigma = 2.0;
 
+    const int maxNumPoints = 150;
+
     const int sizeArea = 16;
     const int sizeHist = 4;
     const int numBins = 8;
 
+    const double k = 4.5;
+
+    Matrix sobelX;
+    Matrix sobelY;
+    vector<Point> points;
+
 public:
-    vector<Descriptor> build(const Matrix & m) const;
+    DescrBuilder(const Matrix & m);
+    vector<Descriptor> build() const;
 
 private:
     vector<double> computeData(const Point &p,
-                   const Matrix & sobelX, const Matrix & sobelY) const;
+            const double rotateAngle, const int sizeHist, const int numBins) const;
 
     Descriptor filterTrash(const Descriptor &descr) const;
     Descriptor normilize(const Descriptor & descr) const;
+    Descriptor normilizeAll(const Descriptor & descr) const;
 };
 
-class PointSearcher{
+class PointMatcher{
 
-    const double eps = 0.05;
+    const double eps;
 
 public:
-    vector<pair<Point,Point>> findSamePoints( const Matrix &m1,const Matrix &m2) const;
+    PointMatcher(const double eps);
+    vector<pair<Point,Point>> match( const Matrix &m1,const Matrix &m2) const;
 };
 
 

@@ -210,19 +210,19 @@ void MainWindow::on_haris_triggered()
 {
     if(picture!=NULL){
         auto points = CornerDetectors().detect(*picture,Algorithm::HARIS);
-        points = PointFileter(picture->width()*picture->height(),30).filter(points);
+        points = PointFileter(picture->width()*picture->height(),150).filter(points);
         showPoints(points);
     }
 }
 
 void MainWindow::on_simpleCompareAction_triggered()
 {
-    QImage image0 = QImage("/home/eugene/giraph.png");
-    QImage image1 = QImage("/home/eugene/giraph1.png");
+    QImage image0 = QImage("/home/eugene/Lenna.png");
+    QImage image1 = QImage("/home/eugene/Lenna1.png");
 
     Matrix m0 = imageToMatrix(image0);
     Matrix m1 = imageToMatrix(image1);
-    auto pairs = PointSearcher().findSamePoints(m0,m1);
+    auto pairs = PointMatcher(0.2).match(m0,m1);
 
     QImage pictures = QImage(m0.width()*2, m0.height(),QImage::Format_ARGB32);
     for(int i = 0; i<m0.width(); i++){

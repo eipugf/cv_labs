@@ -50,8 +50,8 @@ Matrix CornerDetectors::detectMoravec(const Matrix &m) const
 Matrix CornerDetectors::detectHaris(const Matrix &m) const
 {
     auto lambdas = Matrix(m.width(),m.height());
-    auto derX = m.convolution(KernelFactory::sobelX(),Matrix::Border::SIMPLE);
-    auto derY = m.convolution(KernelFactory::sobelY(),Matrix::Border::SIMPLE);
+    auto derX = m.convolution(KernelFactory::sobelX(),Matrix::Border::COPIED);
+    auto derY = m.convolution(KernelFactory::sobelY(),Matrix::Border::COPIED);
     auto w = KernelFactory::createGauss(sigma);
     int wSize = w.width/2;
     for(int i = 0; i < lambdas.width(); i++){
@@ -59,8 +59,8 @@ Matrix CornerDetectors::detectHaris(const Matrix &m) const
             double A = 0, B = 0, C = 0;
             for(int v = 0; v < w.height; v++){
                 for(int u = 0; u < w.width; u++){
-                    double Ix = derX.get(i+u-wSize, j+v-wSize, Matrix::Border::SIMPLE);
-                    double Iy = derY.get(i+u-wSize, j+v-wSize, Matrix::Border::SIMPLE);
+                    double Ix = derX.get(i+u-wSize, j+v-wSize, Matrix::Border::COPIED);
+                    double Iy = derY.get(i+u-wSize, j+v-wSize, Matrix::Border::COPIED);
                     double k = w.matrix[u*w.height+v];
                     A += k*Ix*Ix;
                     B += k*Ix*Iy;
