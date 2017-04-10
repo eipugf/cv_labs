@@ -26,29 +26,31 @@ vector<Descriptor> DescrBuilder::build() const
     for(auto &each : points){
         auto data = computeData(each,0,sizeArea,numBins*k);
 
-        int first = data[0] > data[1]?0:1;
-        int second = data[1] > data[0]?0:1;
+        auto maxh = *max_element(data.begin(),data.end());
 
-        for(int i = 2; i < data.size(); i++){
-            if(data[second] < data[i]){
-                if(data[first] < data[i]){
-                    second = first;
-                    first = i;
-                } else {
-                    second = i;
-                }
+        double angles[3];
+        int nangles = 0;
+        for(int i = 0; i < data.size(); i++){
+            auto h0 = data[i];
+            auto hm = data[(i - 1 + data.size())%data.size()];
+            auto hp = data[(i + 1 + data.size())%data.size()];
+
+            if(h0 > 0.8*maxh && h0 > hm && h0 > hp){
+                auto di = -0.5 * (hp - hm) / (hp + hm - 2 * h0);
+                auto th = 2 * M_PI * (i + di + 0.5) / data.size();
+                angles[nangles++] = th;
+                if(nangles == 3)
+                    break;
             }
         }
 
-        double firstAngle = first*(2*M_PI/(numBins*k));
-        double secondAngle = second*(2*M_PI/(numBins*k));
-        auto hData = computeData(each,firstAngle,sizeHist,numBins);
+        //нашли слишком много пиков выбрасываем точку
+        if(nangles > 1)
+            continue;
 
-        descriptors.emplace_back(normilizeAll(Descriptor(each.x,each.y,move(hData))));
-
-        if(data[first] * 0.8 < data[second]){
-            hData = computeData(each,secondAngle,sizeHist,numBins);
-            descriptors.emplace_back(normilizeAll(Descriptor(each.x,each.y,move(hData))));
+        for(int i = 0; i<nangles; i++){
+            descriptors.emplace_back(normilizeAll(
+                Descriptor(each.x,each.y,computeData(each,angles[i],sizeHist,numBins))));
         }
     }
     return descriptors;
@@ -64,16 +66,32 @@ vector<double> DescrBuilder::computeData(const Point &p,
 {
     int size = sizeArea/sizeHist;
     auto data = vector<double>(size*size * numBins, 0.0);
+
+    auto aSin = sin(rotateAngle);
+    auto aCos = cos(rotateAngle);
+
+    int radArea = sizeArea/2;
     for(int i = 0; i < sizeArea; i++){
         for(int j = 0; j< sizeArea; j++){
-            double dx = sobelX.get(p.x + i - sizeArea/2,
-                          p.y + j - sizeArea/2, Matrix::Border::CILINDER);
-            double dy = sobelY.get(p.x + i - sizeArea/2,
-                          p.y + j - sizeArea/2, Matrix::Border::CILINDER);
 
-            double magnitud = sqrt(dx*dx+dy*dy)*
-                    Utils::gauss(i - sizeArea/2, j - sizeArea/2, sigma);
+            int cx = i - radArea;
+            int cy = j - radArea;
+
+            int x = (cx * aCos - cy * aSin) + radArea;
+            int y = (cx * aSin + cy * aCos) + radArea;
+
+            //выпали из старой окрестности, выбрасываем эту точку
+            if(x >= sizeArea|| y >= sizeArea || x < 0 || y < 0){
+                continue;
+            }
+
+            double dx = sobelX.get(p.x + cx, p.y + cy, Matrix::Border::CILINDER);
+            double dy = sobelY.get(p.x + cx, p.y + cy, Matrix::Border::CILINDER);
+
+            double magnitud = sqrt(dx*dx+dy*dy)*Utils::gauss(cx, cy, sigma);
+
             double phi = atan2(dx,dy)+M_PI - rotateAngle;
+
             phi = fmod(phi+4*M_PI-M_PI/numBins,2*M_PI);
 
             double num = phi/(2*M_PI/numBins);
@@ -81,7 +99,7 @@ vector<double> DescrBuilder::computeData(const Point &p,
             int binIdx1 = ((int)floor(num))%numBins;
             int binIdx2 = ((int)(floor(num)+1))%numBins;
 
-            int hIdx = ((i/sizeHist)*size+j/sizeHist)*numBins;
+            int hIdx = ((x/sizeHist)*size+y/sizeHist)*numBins;
 
             data[hIdx + binIdx1] += magnitud*(ceil(num) - num);
             data[hIdx + binIdx2] += magnitud*(num - floor(num));

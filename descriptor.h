@@ -17,7 +17,7 @@ class DescrBuilder{
     const double treshold = 0.2;
     const double sigma = 2.0;
 
-    const int maxNumPoints = 150;
+    const int maxNumPoints = 100;
 
     const int sizeArea = 16;
     const int sizeHist = 4;

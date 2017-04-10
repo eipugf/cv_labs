@@ -222,7 +222,7 @@ void MainWindow::on_simpleCompareAction_triggered()
 
     Matrix m0 = imageToMatrix(image0);
     Matrix m1 = imageToMatrix(image1);
-    auto pairs = PointMatcher(0.2).match(m0,m1);
+    auto pairs = PointMatcher(0.17).match(m0,m1);
 
     QImage pictures = QImage(m0.width()*2, m0.height(),QImage::Format_ARGB32);
     for(int i = 0; i<m0.width(); i++){
