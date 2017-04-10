@@ -77,8 +77,8 @@ vector<double> DescrBuilder::computeData(const Point &p,
             int cx = i - radArea;
             int cy = j - radArea;
 
-            int x = (cx * aCos - cy * aSin) + radArea;
-            int y = (cx * aSin + cy * aCos) + radArea;
+            int x = (cx * aCos + cy * aSin) + radArea;
+            int y = (-cx * aSin + cy * aCos) + radArea;
 
             //выпали из старой окрестности, выбрасываем эту точку
             if(x >= sizeArea|| y >= sizeArea || x < 0 || y < 0){
