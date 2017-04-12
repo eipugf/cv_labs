@@ -17,6 +17,9 @@ public:
     static function<double(double,double)> hypotenuse();
 
     static function<double(double)> multiple(double num);
+    static function<double (double)> div(double num);
+
+    static function<double(double)> square();
 
     static function<double(double)> normalize(double min, double range);
 
@@ -24,7 +27,6 @@ public:
 
     static double gauss(double x, double y, double sigma);
     static double gauss(double x, double sigma);
-
 
 };
 

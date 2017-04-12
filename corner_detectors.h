@@ -35,6 +35,8 @@ public:
     CornerDetectors();
     vector<Point> detect(const Matrix & m,const Algorithm alg = MORAVEC) const;
 
+//    double computeHaris(const int i, const int j,
+//                        const Kernel & k,const Matrix & m) const;
 private:
     Matrix detectMoravec(const Matrix & m) const;
     Matrix detectHaris(const Matrix & m) const;

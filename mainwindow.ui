@@ -48,6 +48,7 @@
     <addaction name="separator"/>
     <addaction name="action"/>
     <addaction name="haris"/>
+    <addaction name="findBlobs"/>
    </widget>
    <widget class="QMenu" name="menu_3">
     <property name="title">
@@ -111,6 +112,11 @@
   <action name="simpleCompareAction">
    <property name="text">
     <string>Простое сравнение</string>
+   </property>
+  </action>
+  <action name="findBlobs">
+   <property name="text">
+    <string>Поиск блобов</string>
    </property>
   </action>
  </widget>

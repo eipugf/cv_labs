@@ -1,5 +1,5 @@
 #include "descriptor.h"
-#include <stdio.h>
+#include "scalespace.h"
 
 Descriptor::Descriptor(const int x, const int y):
     x(x),y(y){}
@@ -7,9 +7,7 @@ Descriptor::Descriptor(const int x, const int y):
 Descriptor::Descriptor(const int x, const int y, const vector<double> &data):
     Descriptor(x,y)
 {
-    for(double each:data){
-        this->data.push_back(each);
-    }
+    this->data = data;
 }
 
 DescrBuilder::DescrBuilder(const Matrix &m)
@@ -39,13 +37,12 @@ vector<Descriptor> DescrBuilder::build() const
                 auto di = -0.5 * (hp - hm) / (hp + hm - 2 * h0);
                 auto th = 2 * M_PI * (i + di + 0.5) / data.size();
                 angles[nangles++] = th;
-                if(nangles == 3)
+                if(nangles == 2)
                     break;
             }
         }
 
-        //нашли слишком много пиков выбрасываем точку
-        if(nangles > 1)
+        if(nangles > 2)
             continue;
 
         for(int i = 0; i<nangles; i++){
@@ -120,14 +117,11 @@ Descriptor DescrBuilder::filterTrash(const Descriptor &descr) const
 Descriptor DescrBuilder::normilize(const Descriptor &descr) const
 {
     Descriptor result(descr.x,descr.y);
-    double sum = 0;
-    for(double each:descr.data){
-        sum += each*each;
-    }
-    sum = sqrt(sum);
-    for(double each:descr.data){
-        result.data.push_back(each/sum);
-    }
+    result.data = vector<double>(descr.data);
+    double sum = std::accumulate(descr.data.begin(),descr.data.end(),0.0,
+                                [](double x, double y){return x + y*y;});
+    std::transform(descr.data.begin(),descr.data.end(),
+                   result.data.begin(),Utils::div(sqrt(sum)));
     return result;
 }
 
@@ -141,6 +135,7 @@ vector<pair<Point, Point> > PointMatcher::match(
     auto descrM2 = DescrBuilder(m2).build();
     vector<pair<Point, Point>> samePoints;
     for(Descriptor & each:descrM1){
+        int idx = 0;
         for(Descriptor & each1:descrM2){
              double sum = 0;
              for(int i = 0; i<each.data.size(); i++){
@@ -151,8 +146,10 @@ vector<pair<Point, Point> > PointMatcher::match(
                  samePoints.emplace_back(
                       pair<Point,Point>(
                               Point(each.x,each.y,0),Point(each1.x,each1.y,0)));
+                 descrM2.erase(descrM2.begin()+idx);
                  break;
              }
+             idx++;
         }
     }
     return samePoints;

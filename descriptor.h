@@ -17,7 +17,7 @@ class DescrBuilder{
     const double treshold = 0.2;
     const double sigma = 2.0;
 
-    const int maxNumPoints = 100;
+    const int maxNumPoints = 500;
 
     const int sizeArea = 16;
     const int sizeHist = 4;
@@ -48,7 +48,7 @@ class PointMatcher{
 
 public:
     PointMatcher(const double eps);
-    vector<pair<Point,Point>> match( const Matrix &m1,const Matrix &m2) const;
+    vector<pair<Point,Point>> match(const Matrix &m1, const Matrix &m2) const;
 };
 
 

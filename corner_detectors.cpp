@@ -1,5 +1,6 @@
 #include "corner_detectors.h"
-#include <stdio.h>
+#include "scalespace.h"
+
 CornerDetectors::CornerDetectors(){}
 
 vector<Point> CornerDetectors::detect(const Matrix &m,
@@ -73,6 +74,25 @@ Matrix CornerDetectors::detectHaris(const Matrix &m) const
     }
     return lambdas;
 }
+
+
+
+//double CornerDetectors::computeHaris(
+//        const int i, const int j, const Kernel & w,const Matrix & m) const
+//{
+//    double A = 0, B = 0, C = 0;
+//    for(int v = 0; v < w.height; v++){
+//        for(int u = 0; u < w.width; u++){
+//            double Ix = derX.get(i+u-wSize, j+v-wSize, Matrix::Border::COPIED);
+//            double Iy = derY.get(i+u-wSize, j+v-wSize, Matrix::Border::COPIED);
+//            double k = w.matrix[u*w.height+v];
+//            A += k*Ix*Ix;
+//            B += k*Ix*Iy;
+//            C += k*Iy*Iy;
+//        }
+//    }
+//    double std::sqrt(std::pow(A-C,2) + 4*B*B);
+//}
 
 vector<Point> CornerDetectors::localMinimums(const Matrix &m, const double tr) const
 {

@@ -51,6 +51,8 @@ private slots:
 
     void on_simpleCompareAction_triggered();
 
+    void on_findBlobs_triggered();
+
 private:
     Ui::MainWindow *ui;
 

@@ -121,6 +121,8 @@ void MainWindow::showPictureWithPoints(QImage & img,
     showImage(img);
 }
 
+
+
 Matrix MainWindow::imageToMatrix(QImage &image)
 {
     Matrix m = Matrix(image.width(),image.height());
@@ -234,4 +236,31 @@ void MainWindow::on_simpleCompareAction_triggered()
 
     showPictureWithPoints(pictures,pairs);
 
+}
+
+void MainWindow::on_findBlobs_triggered()
+{
+    if(picture!=NULL){
+        auto blobs = ScaleSpace(*picture,6).computeDiffs().searchBlobs();
+        QImage img = QImage(*image);
+        QPainter painter(&img);
+        QPen rpen;
+        rpen.setWidth(1);
+        rpen.setColor(Qt::red);
+
+        QPen gpen;
+        gpen.setWidth(1);
+        gpen.setColor(Qt::green);
+        for(Blob each:blobs){
+            if(each.min){
+                painter.setPen(gpen);
+            } else {
+                painter.setPen(rpen);
+            }
+            double radius = each.efectSigma*M_SQRT2;
+            painter.drawEllipse(QPointF(each.x,each.y), radius, radius);
+        }
+        painter.end();
+        showImage(img);
+    }
 }

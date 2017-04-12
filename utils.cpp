@@ -10,6 +10,16 @@ function<double (double)> Utils::multiple(double num)
     return std::bind1st(std::multiplies<double>(),num);
 }
 
+function<double (double)> Utils::div(double num)
+{
+    return std::bind2nd(std::divides<double>(),num);
+}
+
+function<double (double)> Utils::square()
+{
+    return [](double x){return x*x;};
+}
+
 function<double (double)> Utils::normalize(double min, double range)
 {
     return std::bind([](double a,double b, double c)
