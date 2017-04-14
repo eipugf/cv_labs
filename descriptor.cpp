@@ -91,8 +91,8 @@ vector<double> DescrBuilder::computeData(const Point &p,
                 continue;
             }
 
-            double dx = sobelX.get(p.x + cx, p.y + cy, Matrix::Border::CILINDER);
-            double dy = sobelY.get(p.x + cx, p.y + cy, Matrix::Border::CILINDER);
+            double dx = sobelX.get(p.x + cx, p.y + cy, Matrix::Border::COPIED);
+            double dy = sobelY.get(p.x + cx, p.y + cy, Matrix::Border::COPIED);
 
             double magnitud = sqrt(dx*dx+dy*dy)*Utils::gauss(cx, cy, sigma);
 

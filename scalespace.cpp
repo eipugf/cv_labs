@@ -83,8 +83,8 @@ bool ScaleSpace::checkExtremum(const int octav,
 Matrix ScaleSpace::gauss(const Matrix &matrix,const double sigma) const
 {
     return matrix
-           .convolution(KernelFactory::createGaussX(sigma),Matrix::Border::CILINDER)
-           .convolution(KernelFactory::createGaussY(sigma),Matrix::Border::CILINDER);
+           .convolution(KernelFactory::createGaussX(sigma),Matrix::Border::COPIED)
+           .convolution(KernelFactory::createGaussY(sigma),Matrix::Border::COPIED);
 }
 
 void ScaleSpace::calculate(const Matrix & m)
@@ -147,6 +147,11 @@ vector<Descriptor> SIDiscrBuilder::build(const Matrix &m)
         if(curOct != each.octav || curLayer != each.layer){
             auto descr = DescrBuilder(space.octavs()[curOct][curLayer].matrix,
                                space.octavs()[curOct][curLayer].sigma,points).build();
+            double scale = pow(2,curOct);
+            for(auto & eachDescr:descr){
+                eachDescr.x *= scale;
+                eachDescr.y *= scale;
+            }
             descriptors.insert(descriptors.end(),descr.begin(),descr.end());
             points.clear();
             curOct = each.octav;

@@ -47,6 +47,7 @@ double CornerDetectors::computeHaris(const Matrix &m,
 Matrix CornerDetectors::detectMoravec(const Matrix &m) const
 {
     auto errors = Matrix(m.width(),m.height());
+    auto border = Matrix::Border::COPIED;
     for(int i = 0; i<m.width(); i++){
         for(int j = 0; j<m.height(); j++){
             double min = std::numeric_limits<double>::max();
@@ -57,8 +58,8 @@ Matrix CornerDetectors::detectMoravec(const Matrix &m) const
                     double err = 0;
                     for(int dx = -winSize; dx <= winSize; dx++){
                         for(int dy = -winSize; dy <= winSize; dy++){
-                            err += pow(m.get(i+u+dx,j+v+dy,Matrix::Border::COPIED) -
-                                   m.get(i+dx,j+dy,Matrix::Border::COPIED),2);
+                            err += pow(m.get(i+u+dx,j+v+dy,border) -
+                                   m.get(i+dx,j+dy,border),2);
                         }
                     }
                     min = std::min(min, err);
@@ -73,8 +74,9 @@ Matrix CornerDetectors::detectMoravec(const Matrix &m) const
 Matrix CornerDetectors::detectHaris(const Matrix &m) const
 {
     auto lambdas = Matrix(m.width(),m.height());
-    auto derX = m.convolution(KernelFactory::sobelX(),Matrix::Border::COPIED);
-    auto derY = m.convolution(KernelFactory::sobelY(),Matrix::Border::COPIED);
+    auto border = Matrix::Border::COPIED;
+    auto derX = m.convolution(KernelFactory::sobelX(),border);
+    auto derY = m.convolution(KernelFactory::sobelY(),border);
     auto w = KernelFactory::createGauss(sigma);
     int wSize = w.width/2;
     for(int i = 0; i < lambdas.width(); i++){
@@ -82,8 +84,8 @@ Matrix CornerDetectors::detectHaris(const Matrix &m) const
             double A = 0, B = 0, C = 0;
             for(int v = 0; v < w.height; v++){
                 for(int u = 0; u < w.width; u++){
-                    double Ix = derX.get(i+u-wSize, j+v-wSize, Matrix::Border::COPIED);
-                    double Iy = derY.get(i+u-wSize, j+v-wSize, Matrix::Border::COPIED);
+                    double Ix = derX.get(i+u-wSize, j+v-wSize, border);
+                    double Iy = derY.get(i+u-wSize, j+v-wSize, border);
                     double k = w.matrix[u*w.height+v];
                     A += k*Ix*Ix;
                     B += k*Ix*Iy;
