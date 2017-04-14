@@ -15,7 +15,7 @@ struct Descriptor{
 
 class DescrBuilder{
     const double treshold = 0.2;
-    const double sigma = 2.0;
+    double sigma;
 
     const int maxNumPoints = 500;
 
@@ -31,9 +31,12 @@ class DescrBuilder{
 
 public:
     DescrBuilder(const Matrix & m);
+    DescrBuilder(const Matrix & m,const double sigma,const vector<Point> & points);
     vector<Descriptor> build() const;
 
 private:
+
+
     vector<double> computeData(const Point &p,
             const double rotateAngle, const int sizeHist, const int numBins) const;
 
@@ -41,16 +44,5 @@ private:
     Descriptor normilize(const Descriptor & descr) const;
     Descriptor normilizeAll(const Descriptor & descr) const;
 };
-
-class PointMatcher{
-
-    const double eps;
-
-public:
-    PointMatcher(const double eps);
-    vector<pair<Point,Point>> match(const Matrix &m1, const Matrix &m2) const;
-};
-
-
 
 #endif // DESCRIPTOR_H

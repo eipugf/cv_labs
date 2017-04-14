@@ -5,6 +5,7 @@
 #include <memory>
 #include <vector>
 #include <string>
+#include "descriptor.h"
 
 using namespace std;
 
@@ -19,24 +20,23 @@ struct ScaleLevel{
 };
 
 struct Blob{
-    int level;
+    int layer;
+    int octav;
     int x;
     int y;
-    bool min;
     double sigma;
-    double efectSigma;
-    Blob():min(false),level(0),x(0),y(0),sigma(0),efectSigma(0){}
-    Blob(const int x, const int y, const int level,
-            const double sigma, const double efectSigma, const bool min):
-        level(level),x(x),y(y),sigma(0),efectSigma(efectSigma),min(min){}
+    Blob():layer(0),octav(0),x(0),y(0),sigma(0){}
+    Blob(const Blob & other):
+        layer(other.layer),octav(other.octav),x(other.x),y(other.y),sigma(other.sigma){}
+    Blob(const int x, const int y, const int octav, const int layer, const double sigma):
+        x(x),y(y),octav(octav),layer(layer),sigma(sigma){}
 };
 
 class ScaleSpace
 {
-public:
-
 private:
-    const int _layerSize = 9;
+    const double EPS = 1e-5;
+    const int _layerSize = 6;
     const double startSigma = 0.5;
     const double sigmaA = 1.6;
     const double k = pow(2,1/(double)_layerSize);
@@ -48,6 +48,7 @@ public:
     ScaleSpace(const Matrix &initMatrix,const int numOctavs);
 
     int octaveSize() const;
+    int layerSize() const;
 
     const vector<vector<ScaleLevel>> & octavs() const;
 
@@ -56,9 +57,33 @@ public:
     vector<Blob> searchBlobs() const;
 
 private:
-    int checkExtremum(const int octav, const int level, const int i, const int j) const;
+    bool checkExtremum(const int octav, const int level, const int i, const int j) const;
     Matrix gauss(const Matrix & matrix,const double sigma) const;
     void calculate(const Matrix & m);
+};
+
+class BlobFilter {
+    const double treshold = 15;
+
+public:
+    vector<Blob> filter(const vector<Blob> & blobs, ScaleSpace & space) const;
+};
+
+class SIDiscrBuilder{
+
+public:
+   static vector<Descriptor> build(const Matrix & m);
+
+};
+
+class PointMatcher{
+
+    const double eps;
+
+public:
+    PointMatcher(const double eps);
+    vector<pair<Point,Point>> match(const Matrix &m1,
+                                    const Matrix &m2, const bool withScale = false) const;
 };
 
 #endif // SCALESPACE_H

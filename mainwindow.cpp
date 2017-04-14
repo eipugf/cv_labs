@@ -94,16 +94,6 @@ void MainWindow::showPicture(Matrix & img)
 void MainWindow::showPictureWithPoints(QImage & img,
                                        vector<pair<Point,Point>> & pairs)
 {
-//    auto mult = Utils::multiple(255);
-//    auto grayMatrix = std::move(img.compute(mult));
-//    auto image = QImage(img.width(),img.height(), QImage::Format_ARGB32);
-//    for(int i = 0; i < image.width(); i++){
-//        for(int j = 0; j < image.height(); j++){
-//            byte gray = grayMatrix.get(i,j);
-//            image.setPixel(i,j,qRgb(gray,gray,gray));
-//        }
-//    }
-
     QPainter painter(&img);
     QPen pen;
     pen.setWidth(2);
@@ -241,26 +231,43 @@ void MainWindow::on_simpleCompareAction_triggered()
 void MainWindow::on_findBlobs_triggered()
 {
     if(picture!=NULL){
-        auto blobs = ScaleSpace(*picture,6).computeDiffs().searchBlobs();
+
+        auto space = ScaleSpace(*picture,5);
+        auto blobs = space.computeDiffs().searchBlobs();
+        blobs = BlobFilter().filter(blobs,space);
+
         QImage img = QImage(*image);
         QPainter painter(&img);
         QPen rpen;
-        rpen.setWidth(1);
+        rpen.setWidth(2);
         rpen.setColor(Qt::red);
-
-        QPen gpen;
-        gpen.setWidth(1);
-        gpen.setColor(Qt::green);
+        painter.setPen(rpen);
         for(Blob each:blobs){
-            if(each.min){
-                painter.setPen(gpen);
-            } else {
-                painter.setPen(rpen);
-            }
-            double radius = each.efectSigma*M_SQRT2;
-            painter.drawEllipse(QPointF(each.x,each.y), radius, radius);
+            double k = pow(2,each.octav);
+            double radius = each.sigma*k*M_SQRT2;
+            painter.drawEllipse(QPointF(each.x*k,each.y*k), radius, radius);
         }
         painter.end();
         showImage(img);
     }
+}
+
+void MainWindow::on_scaleCompareAction_triggered()
+{
+    QImage image0 = QImage("/home/eugene/Lenna.png");
+    QImage image1 = QImage("/home/eugene/Lenna1.png");
+
+    Matrix m0 = imageToMatrix(image0);
+    Matrix m1 = imageToMatrix(image1);
+    auto pairs = PointMatcher(0.17).match(m0,m1,true);
+
+    QImage pictures = QImage(m0.width()*2, m0.height(),QImage::Format_ARGB32);
+    for(int i = 0; i<m0.width(); i++){
+        for(int j = 0; j<m0.height(); j++){
+            pictures.setPixel(i,j,image0.pixel(i,j));
+            pictures.setPixel(i+image1.width(),j,image1.pixel(i,j));
+        }
+    }
+
+    showPictureWithPoints(pictures,pairs);
 }

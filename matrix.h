@@ -40,7 +40,6 @@ public:
 
     Matrix& operator=(Matrix&& other) = default;
 
-private:
     double convoluite(const int i,const int j,
                      const Kernel & kernel, const Border border = DEFAULT) const;
 };

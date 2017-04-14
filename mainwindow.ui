@@ -55,6 +55,7 @@
      <string>Сравнение</string>
     </property>
     <addaction name="simpleCompareAction"/>
+    <addaction name="scaleCompareAction"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -117,6 +118,11 @@
   <action name="findBlobs">
    <property name="text">
     <string>Поиск блобов</string>
+   </property>
+  </action>
+  <action name="scaleCompareAction">
+   <property name="text">
+    <string>Сравнение с учётом масштаба</string>
    </property>
   </action>
  </widget>

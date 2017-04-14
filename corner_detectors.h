@@ -16,7 +16,7 @@ struct Point{
     int x;
     int y;
     double value;
-    Point(const int x,const int y,const double v):x(x),y(y),value(v){};
+    Point(const int x,const int y,const double v):x(x),y(y),value(v){}
 };
 
 enum Algorithm {MORAVEC, HARIS};
@@ -35,8 +35,8 @@ public:
     CornerDetectors();
     vector<Point> detect(const Matrix & m,const Algorithm alg = MORAVEC) const;
 
-//    double computeHaris(const int i, const int j,
-//                        const Kernel & k,const Matrix & m) const;
+    double computeHaris(const Matrix & m, const int i, const int j, double sigma);
+
 private:
     Matrix detectMoravec(const Matrix & m) const;
     Matrix detectHaris(const Matrix & m) const;

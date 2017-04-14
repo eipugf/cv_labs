@@ -1,5 +1,4 @@
 #include "descriptor.h"
-#include "scalespace.h"
 
 Descriptor::Descriptor(const int x, const int y):
     x(x),y(y){}
@@ -12,10 +11,20 @@ Descriptor::Descriptor(const int x, const int y, const vector<double> &data):
 
 DescrBuilder::DescrBuilder(const Matrix &m)
 {
-    sobelX = m.convolution(KernelFactory::sobelX(),Matrix::Border::CILINDER);
-    sobelY = m.convolution(KernelFactory::sobelY(),Matrix::Border::CILINDER);
+    sobelX = m.convolution(KernelFactory::sobelX(),Matrix::Border::COPIED);
+    sobelY = m.convolution(KernelFactory::sobelY(),Matrix::Border::COPIED);
     points = CornerDetectors().detect(m,Algorithm::HARIS);
     points = PointFileter(m.width()*m.height(),maxNumPoints).filter(points);
+    sigma = 2.0;
+}
+
+DescrBuilder::DescrBuilder(const Matrix &m,const double sigma,
+                           const vector<Point> & points)
+{
+    sobelX = m.convolution(KernelFactory::sobelX(),Matrix::Border::COPIED);
+    sobelY = m.convolution(KernelFactory::sobelY(),Matrix::Border::COPIED);
+    this->points = points;
+    this->sigma = sigma;
 }
 
 vector<Descriptor> DescrBuilder::build() const
@@ -124,34 +133,3 @@ Descriptor DescrBuilder::normilize(const Descriptor &descr) const
                    result.data.begin(),Utils::div(sqrt(sum)));
     return result;
 }
-
-
-PointMatcher::PointMatcher(const double eps):eps(eps){}
-
-vector<pair<Point, Point> > PointMatcher::match(
-        const Matrix &m1, const Matrix &m2) const
-{
-    auto descrM1 = DescrBuilder(m1).build();
-    auto descrM2 = DescrBuilder(m2).build();
-    vector<pair<Point, Point>> samePoints;
-    for(Descriptor & each:descrM1){
-        int idx = 0;
-        for(Descriptor & each1:descrM2){
-             double sum = 0;
-             for(int i = 0; i<each.data.size(); i++){
-                 sum += (each.data[i]-each1.data[i])*(each.data[i]-each1.data[i]);
-             }
-             sum = sqrt(sum);
-             if(sum < eps){
-                 samePoints.emplace_back(
-                      pair<Point,Point>(
-                              Point(each.x,each.y,0),Point(each1.x,each1.y,0)));
-                 descrM2.erase(descrM2.begin()+idx);
-                 break;
-             }
-             idx++;
-        }
-    }
-    return samePoints;
-}
-
