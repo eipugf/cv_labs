@@ -35,7 +35,7 @@ struct Blob{
 class ScaleSpace
 {
 private:
-    const double EPS = 0.02;
+    const double EPS = 1e-2;
     const int _layerSize = 6;
     const double startSigma = 0.5;
     const double sigmaA = 1.6;
@@ -63,7 +63,7 @@ private:
 };
 
 class BlobFilter {
-    const double treshold = 15;
+    const double treshold = 5;
 
 public:
     vector<Blob> filter(const vector<Blob> & blobs, ScaleSpace & space) const;

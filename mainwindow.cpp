@@ -260,7 +260,7 @@ void MainWindow::on_scaleCompareAction_triggered()
 
     Matrix m0 = imageToMatrix(image0);
     Matrix m1 = imageToMatrix(image1);
-    auto pairs = PointMatcher(0.15).match(m0,m1,true);
+    auto pairs = PointMatcher(0.1).match(m0,m1,true);
 
     QImage pictures = QImage(m0.width()*2, m0.height(),QImage::Format_ARGB32);
     for(int i = 0; i<m0.width(); i++){

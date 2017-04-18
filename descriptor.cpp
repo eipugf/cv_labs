@@ -78,7 +78,9 @@ vector<double> DescrBuilder::computeData(const Point &p,
     const double rotateAngle, const int numHist,
                                 const int sizeHist, const int numBins) const
 {
-    int sizeArea = numHist*sizeHist*(sigma/sigma0);
+    int size = sizeHist*(sigma/sigma0);
+    int sizeArea = numHist*size;
+
 
     auto data = vector<double>(numHist * numHist * numBins, 0.0);
 
@@ -113,7 +115,7 @@ vector<double> DescrBuilder::computeData(const Point &p,
             int binIdx1 = ((int)floor(num))%numBins;
             int binIdx2 = ((int)(floor(num)+1))%numBins;
 
-            int hIdx = ((x/sizeArea)*numHist+y/sizeArea)*numBins;
+            int hIdx = (x/size*numHist+y/size)*numBins;
 
             assert(hIdx + binIdx1 < data.size() && hIdx + binIdx2 < data.size());
 
