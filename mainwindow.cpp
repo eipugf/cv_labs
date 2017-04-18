@@ -150,8 +150,8 @@ void MainWindow::on_gaussAction_triggered()
 {
     if(picture != nullptr) {
         auto resP = std::move(
-           picture->convolution(KernelFactory::createGaussX(0.5),Matrix::Border::CILINDER).
-           convolution(KernelFactory::createGaussY(0.5),Matrix::Border::CILINDER).
+           picture->convolution(KernelFactory::createGaussX(0.5),Matrix::Border::COPIED).
+           convolution(KernelFactory::createGaussY(0.5),Matrix::Border::COPIED).
            normalize());
         showPicture(resP);
     }
@@ -216,6 +216,7 @@ void MainWindow::on_simpleCompareAction_triggered()
     Matrix m1 = imageToMatrix(image1);
     auto pairs = PointMatcher(0.17).match(m0,m1);
 
+
     QImage pictures = QImage(m0.width()*2, m0.height(),QImage::Format_ARGB32);
     for(int i = 0; i<m0.width(); i++){
         for(int j = 0; j<m0.height(); j++){
@@ -259,7 +260,7 @@ void MainWindow::on_scaleCompareAction_triggered()
 
     Matrix m0 = imageToMatrix(image0);
     Matrix m1 = imageToMatrix(image1);
-    auto pairs = PointMatcher(0.2).match(m0,m1,true);
+    auto pairs = PointMatcher(0.15).match(m0,m1,true);
 
     QImage pictures = QImage(m0.width()*2, m0.height(),QImage::Format_ARGB32);
     for(int i = 0; i<m0.width(); i++){

@@ -59,10 +59,10 @@ Matrix Matrix::compress() const
     Matrix compresed(_width/2,_height/2);
     for(int i = 0; i < compresed._width; i++){
         for(int j = 0; j < compresed._height; j++){
-            double average = (get(i*2,j*2,CILINDER)+
-                            get(i*2+1,j*2,CILINDER)+
-                            get(i*2,j*2+1,CILINDER)+
-                            get(i*2+1,j*2+1,CILINDER))/4.0;
+            double average = (get(i*2,j*2,COPIED)+
+                            get(i*2+1,j*2,COPIED)+
+                            get(i*2,j*2+1,COPIED)+
+                            get(i*2+1,j*2+1,COPIED))/4.0;
             compresed.set(i, j, average);
         }
     }

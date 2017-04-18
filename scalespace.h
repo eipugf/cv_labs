@@ -35,7 +35,7 @@ struct Blob{
 class ScaleSpace
 {
 private:
-    const double EPS = 1e-5;
+    const double EPS = 0.02;
     const int _layerSize = 6;
     const double startSigma = 0.5;
     const double sigmaA = 1.6;

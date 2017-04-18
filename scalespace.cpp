@@ -146,7 +146,7 @@ vector<Descriptor> SIDiscrBuilder::build(const Matrix &m)
         }
         if(curOct != each.octav || curLayer != each.layer){
             auto descr = DescrBuilder(space.octavs()[curOct][curLayer].matrix,
-                               space.octavs()[curOct][curLayer].sigma,points).build();
+                     space.octavs()[curOct][curLayer].sigma,points).build();
             double scale = pow(2,curOct);
             for(auto & eachDescr:descr){
                 eachDescr.x *= scale;

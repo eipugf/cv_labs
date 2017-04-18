@@ -14,14 +14,23 @@ struct Descriptor{
 
 
 class DescrBuilder{
-    const double treshold = 0.2;
+    const double treshold = 0.25;
+    double sigma0;
     double sigma;
 
-    const int maxNumPoints = 500;
+    const int maxNumPoints = 150;
 
-    const int sizeArea = 16;
     const int sizeHist = 4;
     const int numBins = 8;
+
+    const int numDescrHist = 4;
+    const int sizeDescrHist = 4;
+    const int numDescrBins = 8;
+
+    const int numRotateHist = 1;
+    const int sizeRotateHist = 16;
+    const int numRotateBins = 36;
+
 
     const double k = 4.5;
 
@@ -31,14 +40,13 @@ class DescrBuilder{
 
 public:
     DescrBuilder(const Matrix & m);
-    DescrBuilder(const Matrix & m,const double sigma,const vector<Point> & points);
+    DescrBuilder(const Matrix & m, const double sigma, const vector<Point> & points);
     vector<Descriptor> build() const;
 
 private:
-
-
     vector<double> computeData(const Point &p,
-            const double rotateAngle, const int sizeHist, const int numBins) const;
+            const double rotateAngle, const int numHist,
+                               const int sizeHist, const int numBins) const;
 
     Descriptor filterTrash(const Descriptor &descr) const;
     Descriptor normilize(const Descriptor & descr) const;
