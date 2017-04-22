@@ -140,32 +140,19 @@ vector<double> DescrBuilder::computeData(const Point &p,
                            sameX < 0 || sameY < 0){
                             continue;
                         }
-                        double w0;
-                        if(sameX < x && x <= xCenter){  //соседняя гистограмма слева
-                            w0 = (x - sameX)/(double)sizeHist;
-                        } else if (xCenter < x && x < sameX){//соседняя гистограмма справа
-                            w0 = (sameX - x)/(double)sizeHist;
-                        } else if(sameX == xCenter){ //центральная гистограмма
-                            w0 = abs(x - sameX)/(double)sizeHist;
-                        } else {
-                            continue;
-                        }
 
-                        double w1;
-                        if(sameY < y && y <= yCenter){//соседняя гистограмма ниже
-                            w1 = (y - sameY)/(double)sizeHist;
-                        } else if (xCenter < x && x < sameY){//соседняя гистограмма выше
-                            w1 = (sameY - y)/(double)sizeHist;
-                        } else if(sameX == xCenter){//центральная гистограмма
-                            w1 = abs(y - sameY)/(double)sizeHist;
-                        } else {
+                        //где-то слишком далеко от центра рассматриваемого бина
+                        if(sameX + sizeHist < x || x < sameX - sizeHist)
                             continue;
-                        }
+                        if(sameY + sizeHist < y || y < sameY - sizeHist)
+                            continue;
+
+                        double w0 = abs(sameX - x)/(double)sizeHist;
+                        double w1 = abs(sameY - y)/(double)sizeHist;
 
                         int hIdx = ((sameCX)*numHist+(sameCY))*numBins;
                         data[hIdx + binIdx1] += w0*w1*magnitud*(ceil(num) - num);
                         data[hIdx + binIdx2] += w0*w1*magnitud*(num - floor(num));
-
                     }
                 }
             } else {
