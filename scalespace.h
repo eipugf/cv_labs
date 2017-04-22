@@ -49,6 +49,7 @@ public:
 
     int octaveSize() const;
     int layerSize() const;
+    double sigma0() const;
 
     const vector<vector<ScaleLevel>> & octavs() const;
 
@@ -62,12 +63,12 @@ private:
     void calculate(const Matrix & m);
 };
 
-class BlobFilter {
-    const double treshold = 5;
+//class BlobFilter {
+//    const double treshold = 30;
 
-public:
-    vector<Blob> filter(const vector<Blob> & blobs, ScaleSpace & space) const;
-};
+//public:
+//    vector<Blob> filter(const vector<Blob> & blobs, ScaleSpace & space) const;
+//};
 
 class SIDiscrBuilder{
 

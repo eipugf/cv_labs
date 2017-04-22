@@ -18,7 +18,7 @@ class DescrBuilder{
     double sigma0;
     double sigma;
 
-    const int maxNumPoints = 150;
+    const int maxNumPoints =200;
 
     const int sizeHist = 4;
     const int numBins = 8;
@@ -31,16 +31,14 @@ class DescrBuilder{
     const int sizeRotateHist = 16;
     const int numRotateBins = 36;
 
-
-    const double k = 4.5;
-
     Matrix sobelX;
     Matrix sobelY;
     vector<Point> points;
 
 public:
     DescrBuilder(const Matrix & m);
-    DescrBuilder(const Matrix & m, const double sigma, const vector<Point> & points);
+    DescrBuilder(const vector<Point> & points, Matrix & derX, Matrix & derY,
+                                const double sigma, const double sigma0);
     vector<Descriptor> build() const;
 
 private:

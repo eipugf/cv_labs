@@ -21,14 +21,13 @@ DescrBuilder::DescrBuilder(const Matrix &m)
     sigma = 2.0;
 }
 
-DescrBuilder::DescrBuilder(const Matrix &m,const double sigma,
-                                        const vector<Point> & points)
+DescrBuilder::DescrBuilder(
+        const vector<Point> & points, Matrix & derX,
+            Matrix & derY, const double sigma, const double sigma0):
+                                    points(points),sigma(sigma),sigma0(sigma0)
 {
-    sobelX = m.convolution(KernelFactory::sobelX(),Matrix::Border::COPIED);
-    sobelY = m.convolution(KernelFactory::sobelY(),Matrix::Border::COPIED);
-    this->points = points;
-    this->sigma0 = 1.6;
-    this->sigma = sigma;
+    sobelX = move(derX);
+    sobelY = move(derY);
 }
 
 
@@ -37,9 +36,7 @@ vector<Descriptor> DescrBuilder::build() const
     auto descriptors = vector<Descriptor>();
     for(auto &each : points){
         auto data = computeData(each,0,numRotateHist,sizeRotateHist,numRotateBins);
-
         auto maxh = *max_element(data.begin(),data.end());
-
         double angles[3];
         int nangles = 0;
         for(int i = 0; i < data.size(); i++){
@@ -115,12 +112,67 @@ vector<double> DescrBuilder::computeData(const Point &p,
             int binIdx1 = ((int)floor(num))%numBins;
             int binIdx2 = ((int)(floor(num)+1))%numBins;
 
-            int hIdx = (x/size*numHist+y/size)*numBins;
+            //нашли индексы текущей гистограммы
+            int xBin = x/size;
+            int yBin = y/size;
 
-            assert(hIdx + binIdx1 < data.size() && hIdx + binIdx2 < data.size());
+            if(numHist > 1){
+                //нашли центр текущей гистограммы
+                int xCenter = (x/size)*sizeHist+sizeHist/2;
+                int yCenter = (y/size)*sizeHist+sizeHist/2;
+                //перебираем соседние гистограммы на предмет возможности добавить
+                //в них взвешанные значение
+                for(int k = -1; k < 2; k++){
+                    for(int t = -1; t < 2; t++){
+                        //нашли соседний центр относительно текущей гистограммы
+                        int sameX = xCenter + k*sizeHist;
+                        int sameY = yCenter + t*sizeHist;
+                        int sameCX = xBin + k;
+                        int sameCY = yBin + t;
+                        //получили невалидный индекс бина
+                        if(sameCX < 0 || sameCY < 0 ||
+                           sameCX >= numHist || sameCY >= numHist){
+                            continue;
+                        }
+                        //проверили, не вышли ли мы за границы области
+                        if(sameX >= sizeArea ||
+                           sameY >= sizeArea ||
+                           sameX < 0 || sameY < 0){
+                            continue;
+                        }
+                        double w0;
+                        if(sameX < x && x <= xCenter){  //соседняя гистограмма слева
+                            w0 = (x - sameX)/(double)sizeHist;
+                        } else if (xCenter < x && x < sameX){//соседняя гистограмма справа
+                            w0 = (sameX - x)/(double)sizeHist;
+                        } else if(sameX == xCenter){ //центральная гистограмма
+                            w0 = abs(x - sameX)/(double)sizeHist;
+                        } else {
+                            continue;
+                        }
 
-            data[hIdx + binIdx1] += magnitud*(ceil(num) - num);
-            data[hIdx + binIdx2] += magnitud*(num - floor(num));
+                        double w1;
+                        if(sameY < y && y <= yCenter){//соседняя гистограмма ниже
+                            w1 = (y - sameY)/(double)sizeHist;
+                        } else if (xCenter < x && x < sameY){//соседняя гистограмма выше
+                            w1 = (sameY - y)/(double)sizeHist;
+                        } else if(sameX == xCenter){//центральная гистограмма
+                            w1 = abs(y - sameY)/(double)sizeHist;
+                        } else {
+                            continue;
+                        }
+
+                        int hIdx = ((sameCX)*numHist+(sameCY))*numBins;
+                        data[hIdx + binIdx1] += w0*w1*magnitud*(ceil(num) - num);
+                        data[hIdx + binIdx2] += w0*w1*magnitud*(num - floor(num));
+
+                    }
+                }
+            } else {
+                int hIdx = (xBin*numHist+yBin)*numBins;
+                data[hIdx + binIdx1] += magnitud*(ceil(num) - num);
+                data[hIdx + binIdx2] += magnitud*(num - floor(num));
+            }
         }
     }
     return data;

@@ -21,19 +21,18 @@ vector<Point> CornerDetectors::detect(const Matrix &m,
     return localMinimums(matrix, tr);
 }
 
-double CornerDetectors::computeHaris(const Matrix &m,
-                                     const int i, const int j, double sigma)
+double CornerDetectors::computeHaris(
+    const int i, const int j,const double sigma,
+                         const Matrix & derX, const Matrix & derY)
 {
     auto w = KernelFactory::createGauss(sigma);
     auto border = Matrix::Border::COPIED;
-    auto kSobelX = KernelFactory::sobelX();
-    auto kSobelY = KernelFactory::sobelY();
     int wSize = w.width/2;
     double A = 0, B = 0, C = 0;
     for(int v = 0; v < w.height; v++){
         for(int u = 0; u < w.width; u++){
-            double Ix = m.convoluite(i+u-wSize, j+v-wSize, kSobelX, border);
-            double Iy = m.convoluite(i+u-wSize, j+v-wSize, kSobelY, border);
+            double Ix = derX.get(i+u-wSize, j+v-wSize, border);
+            double Iy = derY.get(i+u-wSize, j+v-wSize, border);
             double k = w.matrix[u*w.height+v];
             A += k*Ix*Ix;
             B += k*Ix*Iy;

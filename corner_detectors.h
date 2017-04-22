@@ -35,11 +35,14 @@ public:
     CornerDetectors();
     vector<Point> detect(const Matrix & m,const Algorithm alg = MORAVEC) const;
 
-    double computeHaris(const Matrix & m, const int i, const int j, double sigma);
+    double computeHaris(const int i, const int j,const double sigma,
+                                    const Matrix & derX, const Matrix & derY);
 
 private:
+
     Matrix detectMoravec(const Matrix & m) const;
     Matrix detectHaris(const Matrix & m) const;
+
     vector<Point> localMinimums(const Matrix & m, const double tr) const;
     bool isMinimum(const Matrix & m,const int i,const int j, const double tr) const;
 };

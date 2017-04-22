@@ -14,6 +14,11 @@ int ScaleSpace::octaveSize() const
     return _layerSize;
 }
 
+double ScaleSpace::sigma0() const
+{
+    return sigmaA;
+}
+
 const vector<vector<ScaleLevel> > & ScaleSpace::octavs() const
 {
     return _octavs;
@@ -27,7 +32,7 @@ ScaleSpace ScaleSpace::computeDiffs() const
             ScaleLevel diff;
             auto & m1 = _octavs[octav][layer].matrix;
             auto & m2 = _octavs[octav][layer+1].matrix;
-            diff.matrix = m1.compute(m2,std::minus<double>());
+            diff.matrix = m2.compute(m1,std::minus<double>());
             diff.sigma = _octavs[octav][layer].sigma;
             diff.efectSigma = _octavs[octav][layer].efectSigma;
             diffs._octavs[octav].emplace_back(move(diff));
@@ -115,49 +120,42 @@ void ScaleSpace::calculate(const Matrix & m)
     }
 }
 
-vector<Blob> BlobFilter::filter(const vector<Blob> & blobs, ScaleSpace & space) const
-{
-    vector<Blob> result;
-    const auto & oct = space.octavs();
-    for(const Blob & each:blobs){
-        double k = pow(2,each.octav);
-        auto haris = CornerDetectors().computeHaris(
-             oct[each.octav][each.layer].matrix,each.x,each.y,each.sigma*M_SQRT2);
-        if(haris > treshold){
-            result.emplace_back(Blob(each));
-        }
-    }
-    return result;
-}
-
 
 vector<Descriptor> SIDiscrBuilder::build(const Matrix &m)
 {
+    double treshold = 15;
     auto space = ScaleSpace(m,5);
-    auto blobs = BlobFilter().filter(space.computeDiffs().searchBlobs(),space);
+    auto blobs = space.computeDiffs().searchBlobs();
     int curOct = -1;
     int curLayer = -1;
     vector<Point> points;
     vector<Descriptor> descriptors;
+    Matrix derX;
+    Matrix derY;
     for(const Blob & each:blobs){
-        if(curLayer < 0 && curOct < 0){
-            curLayer = each.layer;
-            curOct = each.octav;
-        }
         if(curOct != each.octav || curLayer != each.layer){
-            auto descr = DescrBuilder(space.octavs()[curOct][curLayer].matrix,
-                     space.octavs()[curOct][curLayer].sigma,points).build();
-            double scale = pow(2,curOct);
-            for(auto & eachDescr:descr){
-                eachDescr.x *= scale;
-                eachDescr.y *= scale;
+            if(points.size() > 0){
+                auto sigma = space.octavs()[curOct][curLayer].sigma;
+                auto descr = DescrBuilder(points, derX, derY,sigma,space.sigma0()).build();
+                double scale = pow(2,curOct);
+                for(auto & eachDescr:descr){
+                    eachDescr.x *= scale;
+                    eachDescr.y *= scale;
+                }
+                descriptors.insert(descriptors.end(),descr.begin(),descr.end());
+                points.clear();
             }
-            descriptors.insert(descriptors.end(),descr.begin(),descr.end());
-            points.clear();
             curOct = each.octav;
             curLayer = each.layer;
+            auto & m = space.octavs()[curOct][curLayer].matrix;
+            derX = m.convolution(KernelFactory::sobelX(),Matrix::Border::COPIED);
+            derY = m.convolution(KernelFactory::sobelY(),Matrix::Border::COPIED);
         }
-        points.emplace_back(Point(each.x, each.y, 0));
+        double haris = CornerDetectors().computeHaris(
+                    each.x,each.y,each.sigma*M_SQRT2,derX,derY);
+        if(haris > treshold){
+            points.emplace_back(Point(each.x, each.y, 0));
+        }
     }
     return descriptors;
 }
@@ -170,22 +168,33 @@ vector<pair<Point, Point> > PointMatcher::match(
     auto descrM1 = withScale?SIDiscrBuilder::build(m1):DescrBuilder(m1).build();
     auto descrM2 = withScale?SIDiscrBuilder::build(m2):DescrBuilder(m2).build();
     vector<pair<Point, Point>> samePoints;
+
     for(Descriptor & each:descrM1){
-        int idx = 0;
-        for(Descriptor & each1:descrM2){
-             double sum = 0;
-             for(int i = 0; i<each.data.size(); i++){
-                 sum += (each.data[i]-each1.data[i])*(each.data[i]-each1.data[i]);
-             }
-             sum = sqrt(sum);
-             if(sum < eps){
-                 samePoints.emplace_back(
-                      pair<Point,Point>(
-                              Point(each.x,each.y,0),Point(each1.x,each1.y,0)));
-                 descrM2.erase(descrM2.begin()+idx);
-                 break;
-             }
-             idx++;
+        bool first = true;
+        int descrIdx = -1;
+        double minRo = 0;
+        for(int idx=0; idx < descrM2.size(); idx++){
+            double sum = 0;
+            const Descriptor & each1 = descrM2[idx];
+            for(int i = 0; i<each.data.size(); i++){
+                sum += (each.data[i]-each1.data[i])*(each.data[i]-each1.data[i]);
+            }
+            sum = sqrt(sum);
+            if(sum < eps){
+                if(!first){
+                    if(minRo < sum) descrIdx = idx;
+                    break;
+                }
+                first = false;
+                descrIdx = idx;
+                minRo = sum;
+            }
+        }
+        if(descrIdx > -1){
+            auto & d2 = descrM2[descrIdx];
+            samePoints.emplace_back(
+                pair<Point,Point>(Point(each.x,each.y,0),Point(d2.x,d2.y,0)));
+            descrM2.erase(descrM2.begin()+descrIdx);
         }
     }
     return samePoints;
