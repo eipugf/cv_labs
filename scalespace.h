@@ -35,7 +35,7 @@ struct Blob{
 class ScaleSpace
 {
 private:
-    const double EPS = 1e-2;
+    const double EPS = 0.0001;
     const int _layerSize = 6;
     const double startSigma = 0.5;
     const double sigmaA = 1.6;
@@ -62,13 +62,6 @@ private:
     Matrix gauss(const Matrix & matrix,const double sigma) const;
     void calculate(const Matrix & m);
 };
-
-//class BlobFilter {
-//    const double treshold = 30;
-
-//public:
-//    vector<Blob> filter(const vector<Blob> & blobs, ScaleSpace & space) const;
-//};
 
 class SIDiscrBuilder{
 

@@ -7,9 +7,12 @@ using namespace std;
 struct Descriptor{
     int x;
     int y;
+    double angle;
+    double rad;
     vector<double> data;
-    Descriptor(const int x,const int y);
-    Descriptor(const int x, const int y, const vector<double> & data);
+    Descriptor(const int x,const int y, const double angle = 0);
+    Descriptor(const int x, const int y,
+               const vector<double> & data, const double angle = 0);
 };
 
 

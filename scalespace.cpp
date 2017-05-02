@@ -32,7 +32,7 @@ ScaleSpace ScaleSpace::computeDiffs() const
             ScaleLevel diff;
             auto & m1 = _octavs[octav][layer].matrix;
             auto & m2 = _octavs[octav][layer+1].matrix;
-            diff.matrix = m2.compute(m1,std::minus<double>());
+            diff.matrix = m1.compute(m2,std::minus<double>());
             diff.sigma = _octavs[octav][layer].sigma;
             diff.efectSigma = _octavs[octav][layer].efectSigma;
             diffs._octavs[octav].emplace_back(move(diff));
@@ -123,7 +123,7 @@ void ScaleSpace::calculate(const Matrix & m)
 
 vector<Descriptor> SIDiscrBuilder::build(const Matrix &m)
 {
-    double treshold = 15;
+    double treshold = 5;
     auto space = ScaleSpace(m,5);
     auto blobs = space.computeDiffs().searchBlobs();
     int curOct = -1;
@@ -132,8 +132,12 @@ vector<Descriptor> SIDiscrBuilder::build(const Matrix &m)
     vector<Descriptor> descriptors;
     Matrix derX;
     Matrix derY;
-    for(const Blob & each:blobs){
-        if(curOct != each.octav || curLayer != each.layer){
+    int idx = 0;
+    while(true){
+        const Blob & each = blobs[idx++];
+        //список блобов закончился, или перешли в другую октаву/уровень
+        if(curOct != each.octav || curLayer != each.layer || idx == blobs.size()){
+            //обработываем все блобы, что были собраны ранее
             if(points.size() > 0){
                 auto sigma = space.octavs()[curOct][curLayer].sigma;
                 auto descr = DescrBuilder(points, derX, derY,sigma,space.sigma0()).build();
@@ -141,10 +145,15 @@ vector<Descriptor> SIDiscrBuilder::build(const Matrix &m)
                 for(auto & eachDescr:descr){
                     eachDescr.x *= scale;
                     eachDescr.y *= scale;
+                    eachDescr.rad = sigma*scale*M_SQRT2;
                 }
                 descriptors.insert(descriptors.end(),descr.begin(),descr.end());
                 points.clear();
             }
+            //если больше нет блобов, выходим
+            if(idx == blobs.size())
+                break;
+            //если ещё есть блобы, пересчитываем производные и работаем в нов ур/окт
             curOct = each.octav;
             curLayer = each.layer;
             auto & m = space.octavs()[curOct][curLayer].matrix;
@@ -182,7 +191,8 @@ vector<pair<Point, Point> > PointMatcher::match(
             sum = sqrt(sum);
             if(sum < eps){
                 if(!first){
-                    if(minRo < sum) descrIdx = idx;
+                    if(minRo < sum)
+                        descrIdx = idx;
                     break;
                 }
                 first = false;
@@ -192,8 +202,14 @@ vector<pair<Point, Point> > PointMatcher::match(
         }
         if(descrIdx > -1){
             auto & d2 = descrM2[descrIdx];
+            auto p1 = Point(each.x,each.y,0);
+            auto p2 = Point(d2.x,d2.y,0);
+            p1.angle = each.angle;
+            p1.rad = each.rad;
+            p2.angle = d2.angle;
+            p2.rad = d2.rad;
             samePoints.emplace_back(
-                pair<Point,Point>(Point(each.x,each.y,0),Point(d2.x,d2.y,0)));
+                pair<Point,Point>(p1,p2));
             descrM2.erase(descrM2.begin()+descrIdx);
         }
     }

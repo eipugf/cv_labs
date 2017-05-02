@@ -9,6 +9,7 @@
 #include <time.h>
 #include <stdio.h>
 #include "descriptor.h"
+#include "ransac.h"
 
 using namespace std;
 
@@ -33,7 +34,8 @@ void MainWindow::on_close_triggered()
 void MainWindow::on_openPicture_triggered()
 {
     QString path = QFileDialog::getOpenFileName(
-                this,tr("Open file"),NULL,"PNG (*.png)");
+                this,tr("Open file"),NULL,"PNG (*.png | *.jpg)");
+
     if(path.length() > 0){
         image = make_unique<QImage>(path);
         picture = make_unique<Matrix>(image->width(),image->height());
@@ -96,14 +98,42 @@ void MainWindow::showPictureWithPoints(QImage & img,
 {
     QPainter painter(&img);
     QPen pen;
-    pen.setWidth(2);
+    pen.setWidth(1);
     pen.setColor(Qt::red);
     painter.setPen(pen);
 
     for(auto &each:pairs){
         Point p1 = each.first;
         Point p2 = each.second;
-        painter.drawLine(p1.x, p1.y,p2.x+img.width()/2, p2.y);
+        double p2x = p2.x+img.width()/2;
+        double p2y = p2.y;
+
+        painter.drawLine(p1.x, p1.y,p2x, p2y);
+        painter.drawEllipse(QPointF(p1.x,p1.y),p1.rad, p1.rad);
+
+        painter.drawEllipse(QPointF(p2x,p2y),p2.rad, p2.rad);
+        painter.drawLine(p1.x,p1.y,p1.x+p1.rad*sin(p1.angle),p1.y+p1.rad*cos(p1.angle));
+
+        painter.drawLine(p2x,p2y,p2x+p2.rad*sin(p2.angle),p2y+p2.rad*cos(p2.angle));
+
+    }
+    painter.end();
+    showImage(img);
+}
+
+void MainWindow::showPictureWithDescr(QImage &img, vector<Descriptor> &descr)
+{
+    QPainter painter(&img);
+    QPen pen;
+    pen.setWidth(1);
+    pen.setColor(Qt::red);
+    painter.setPen(pen);
+
+    for(auto &each:descr){
+        painter.drawEllipse(QPointF(each.x,each.y), each.rad, each.rad);
+        double x2 = each.x + each.rad*sin(each.angle);
+        double y2 = each.y + each.rad*cos(each.angle);
+        painter.drawLine(each.x,each.y,x2,y2);
     }
 
     painter.end();
@@ -214,7 +244,7 @@ void MainWindow::on_simpleCompareAction_triggered()
 
     Matrix m0 = imageToMatrix(image0);
     Matrix m1 = imageToMatrix(image1);
-    auto pairs = PointMatcher(0.17).match(m0,m1);
+    auto pairs = PointMatcher(0.2).match(m0,m1);
 
 
     QImage pictures = QImage(m0.width()*2, m0.height(),QImage::Format_ARGB32);
@@ -239,7 +269,7 @@ void MainWindow::on_findBlobs_triggered()
         QImage img = QImage(*image);
         QPainter painter(&img);
         QPen rpen;
-        rpen.setWidth(2);
+        rpen.setWidth(1);
         rpen.setColor(Qt::red);
         painter.setPen(rpen);
         for(Blob each:blobs){
@@ -254,12 +284,12 @@ void MainWindow::on_findBlobs_triggered()
 
 void MainWindow::on_scaleCompareAction_triggered()
 {
-    QImage image0 = QImage("/home/eugene/Lenna.png");
-    QImage image1 = QImage("/home/eugene/Lenna1.png");
+    QImage image0 = QImage("/home/eugene/rans.jpg");
+    QImage image1 = QImage("/home/eugene/rans1.jpg");
 
     Matrix m0 = imageToMatrix(image0);
     Matrix m1 = imageToMatrix(image1);
-    auto pairs = PointMatcher(0.2).match(m0,m1,true);
+    auto pairs = PointMatcher(0.05).match(m0,m1,true);
 
     QImage pictures = QImage(m0.width()*2, m0.height(),QImage::Format_ARGB32);
     for(int i = 0; i<m0.width(); i++){
@@ -270,4 +300,51 @@ void MainWindow::on_scaleCompareAction_triggered()
     }
 
     showPictureWithPoints(pictures,pairs);
+}
+
+void MainWindow::on_seeDescriptors_triggered()
+{
+    if(picture!=NULL){
+        auto descr = SIDiscrBuilder::build(*picture);
+        showPictureWithDescr(*image,descr);
+    }
+}
+
+void MainWindow::on_computeRansac_triggered()
+{
+    QImage image0 = QImage("/home/eugene/rans.jpg");
+    QImage image1 = QImage("/home/eugene/rans1.jpg");
+    Matrix m0 = imageToMatrix(image0);
+    Matrix m1 = imageToMatrix(image1);
+    auto pairs = PointMatcher(0.1).match(m0,m1,true);
+
+    vector<pair<Point, Point>> swaped;
+    for(auto & pair:pairs){
+        Point p1(pair.first.x,pair.first.y,0);
+        Point p2(pair.second.x,pair.second.y,0);
+
+        swaped.emplace_back(std::pair<Point,Point>(p1,p2));
+    }
+
+    auto h = Ransac().searchTransform(swaped);
+
+    QImage result((m0.width() + m1.width()) / 2 * 1.8,
+                  (m0.height() + m1.height()) / 2 * 1.3,
+                  QImage::Format_RGB32);
+
+
+
+    QPainter painter(&result);
+    painter.translate(300, 0);
+    painter.drawImage(0, 0, image1);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setRenderHint(QPainter::SmoothPixmapTransform);
+    QTransform transform(h[0], h[3], h[6],
+                         h[1], h[4], h[7],
+                         h[2], h[5], h[8]
+                         );
+    painter.setTransform(transform, true);
+    painter.drawImage(0, 0, image0);
+
+    showImage(result);
 }

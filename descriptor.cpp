@@ -1,10 +1,11 @@
 #include "descriptor.h"
 
-Descriptor::Descriptor(const int x, const int y):
-    x(x),y(y){}
+Descriptor::Descriptor(const int x, const int y, const double angle):
+    x(x),y(y),angle(angle){}
 
-Descriptor::Descriptor(const int x, const int y, const vector<double> &data):
-    Descriptor(x,y)
+Descriptor::Descriptor(const int x, const int y,
+                       const vector<double> &data,const double angle):
+    Descriptor(x,y,angle)
 {
     for(double each:data){
         this->data.push_back(each);
@@ -59,8 +60,8 @@ vector<Descriptor> DescrBuilder::build() const
         for(int i = 0; i<nangles; i++){
             descriptors.emplace_back(normilizeAll(
                Descriptor(each.x,each.y,
-                   computeData(each,angles[i],
-                               numDescrHist, sizeDescrHist, numDescrBins))));
+                    computeData(each,angles[i],
+                        numDescrHist, sizeDescrHist, numDescrBins),angles[i])));
         }
     }
     return descriptors;
@@ -117,9 +118,10 @@ vector<double> DescrBuilder::computeData(const Point &p,
             int yBin = y/size;
 
             if(numHist > 1){
+                //и тут есть косяк где-то однако
                 //нашли центр текущей гистограммы
-                int xCenter = (x/size)*sizeHist+sizeHist/2;
-                int yCenter = (y/size)*sizeHist+sizeHist/2;
+                int xCenter = (xBin)*sizeHist+sizeHist/2;
+                int yCenter = (yBin)*sizeHist+sizeHist/2;
                 //перебираем соседние гистограммы на предмет возможности добавить
                 //в них взвешанные значение
                 for(int k = -1; k < 2; k++){
@@ -147,8 +149,8 @@ vector<double> DescrBuilder::computeData(const Point &p,
                         if(sameY + sizeHist < y || y < sameY - sizeHist)
                             continue;
 
-                        double w0 = abs(sameX - x)/(double)sizeHist;
-                        double w1 = abs(sameY - y)/(double)sizeHist;
+                        double w0 = 1.0 - (abs(sameX - x)/(double)sizeHist);
+                        double w1 = 1.0 - (abs(sameY - y)/(double)sizeHist);
 
                         int hIdx = ((sameCX)*numHist+(sameCY))*numBins;
                         data[hIdx + binIdx1] += w0*w1*magnitud*(ceil(num) - num);
@@ -168,6 +170,8 @@ vector<double> DescrBuilder::computeData(const Point &p,
 Descriptor DescrBuilder::filterTrash(const Descriptor &descr) const
 {
     Descriptor result(descr.x,descr.y);
+    result.rad = descr.rad;
+    result.angle = descr.angle;
     for(double bin:descr.data){
         result.data.push_back(min(treshold, bin));
     }
@@ -177,6 +181,8 @@ Descriptor DescrBuilder::filterTrash(const Descriptor &descr) const
 Descriptor DescrBuilder::normilize(const Descriptor &descr) const
 {
     Descriptor result(descr.x,descr.y);
+    result.rad = descr.rad;
+    result.angle = descr.angle;
     double sum = 0;
     for(double each:descr.data){
         sum += each*each;

@@ -15,6 +15,8 @@ using namespace std::placeholders;
 struct Point{
     int x;
     int y;
+    double angle;
+    double rad;
     double value;
     Point(const int x,const int y,const double v):x(x),y(y),value(v){}
 };

@@ -13,6 +13,9 @@ TEMPLATE = app
 
 CONFIG += c++14
 
+INCLUDEPATH += "/usr/local/include/gsl/"
+LIBS += "/usr/local/lib/*.so"
+
 SOURCES += main.cpp\
         mainwindow.cpp \
     kernel.cpp \
@@ -20,7 +23,8 @@ SOURCES += main.cpp\
     utils.cpp \
     scalespace.cpp \
     corner_detectors.cpp \
-    descriptor.cpp
+    descriptor.cpp \
+    ransac.cpp
 
 HEADERS  += mainwindow.h \
     kernel.h \
@@ -28,6 +32,7 @@ HEADERS  += mainwindow.h \
     utils.h \
     scalespace.h \
     corner_detectors.h \
-    descriptor.h
+    descriptor.h \
+    ransac.h
 
 FORMS    += mainwindow.ui

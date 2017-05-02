@@ -9,6 +9,7 @@
 #include "matrix.h"
 #include "corner_detectors.h"
 #include <vector>
+#include "descriptor.h"
 
 using namespace std;
 
@@ -55,6 +56,10 @@ private slots:
 
     void on_scaleCompareAction_triggered();
 
+    void on_seeDescriptors_triggered();
+
+    void on_computeRansac_triggered();
+
 private:
     Ui::MainWindow *ui;
 
@@ -62,6 +67,7 @@ private:
     void save(const Matrix & level, const string & file) const;
     void showImage(QImage & image);
     void showPictureWithPoints(QImage & img,vector<pair<Point,Point>> & pairs);
+    void showPictureWithDescr(QImage & img,vector<Descriptor> & pairs);
     Matrix imageToMatrix(QImage & image);
     void showPoints(vector<Point> & points);
 };
