@@ -18,6 +18,7 @@ struct Point{
     double angle;
     double rad;
     double value;
+    double sigma;
     Point(const int x,const int y,const double v):x(x),y(y),value(v){}
 };
 

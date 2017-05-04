@@ -9,6 +9,7 @@ struct Descriptor{
     int y;
     double angle;
     double rad;
+    double sigma;
     vector<double> data;
     Descriptor(const int x,const int y, const double angle = 0);
     Descriptor(const int x, const int y,

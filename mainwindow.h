@@ -60,6 +60,8 @@ private slots:
 
     void on_computeRansac_triggered();
 
+    void on_actionHough_triggered();
+
 private:
     Ui::MainWindow *ui;
 

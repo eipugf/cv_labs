@@ -133,7 +133,7 @@ vector<Descriptor> SIDiscrBuilder::build(const Matrix &m)
     Matrix derX;
     Matrix derY;
     int idx = 0;
-    while(true){
+    while(true && blobs.size() > 0){
         const Blob & each = blobs[idx++];
         //список блобов закончился, или перешли в другую октаву/уровень
         if(curOct != each.octav || curLayer != each.layer || idx == blobs.size()){
@@ -145,6 +145,7 @@ vector<Descriptor> SIDiscrBuilder::build(const Matrix &m)
                 for(auto & eachDescr:descr){
                     eachDescr.x *= scale;
                     eachDescr.y *= scale;
+                    eachDescr.sigma = sigma*scale;
                     eachDescr.rad = sigma*scale*M_SQRT2;
                 }
                 descriptors.insert(descriptors.end(),descr.begin(),descr.end());
@@ -206,8 +207,10 @@ vector<pair<Point, Point> > PointMatcher::match(
             auto p2 = Point(d2.x,d2.y,0);
             p1.angle = each.angle;
             p1.rad = each.rad;
+            p1.sigma = each.sigma;
             p2.angle = d2.angle;
             p2.rad = d2.rad;
+            p2.sigma = d2.sigma;
             samePoints.emplace_back(
                 pair<Point,Point>(p1,p2));
             descrM2.erase(descrM2.begin()+descrIdx);

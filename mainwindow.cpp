@@ -9,6 +9,7 @@
 #include <time.h>
 #include <stdio.h>
 #include "descriptor.h"
+#include "haugh.h"
 #include "ransac.h"
 
 using namespace std;
@@ -328,8 +329,8 @@ void MainWindow::on_computeRansac_triggered()
 
     auto h = Ransac().searchTransform(swaped);
 
-    QImage result((m0.width() + m1.width()) / 2 * 1.8,
-                  (m0.height() + m1.height()) / 2 * 1.3,
+    QImage result((m0.width() + m1.width()) ,
+                  (m0.height() + m1.height()) / 1.5,
                   QImage::Format_RGB32);
 
 
@@ -347,4 +348,31 @@ void MainWindow::on_computeRansac_triggered()
     painter.drawImage(0, 0, image0);
 
     showImage(result);
+}
+
+void MainWindow::on_actionHough_triggered()
+{
+    QImage image0 = QImage("/home/eugene/hough.jpg");
+    QImage image1 = QImage("/home/eugene/hough.jpg");
+    Matrix m0 = imageToMatrix(image0);
+    Matrix m1 = imageToMatrix(image1);
+    auto pairs = PointMatcher(0.1).match(m0,m1,true);
+
+    if(pairs.size() > 2){
+        auto transf = Hough(m0.width(),m0.height(),m1.width(),
+                            m1.height(),pairs).computeHaugh();
+        QImage result = QImage(image1);
+        QPainter painter(&result);
+        int size1 = m1.width()*transf.scale;
+        int size2 = m1.width()*transf.scale;
+        painter.drawEllipse(QPointF(transf.x, transf.y), 10, 10);
+        QRect rect = QRect(transf.x - m1.width()*transf.scale / 2,
+                           transf.y - m1.height()*transf.scale / 2,
+                           size1, size2);
+        painter.drawRect(rect);
+        showImage(result);
+    } else {
+        showImage(image1);
+    }
+
 }

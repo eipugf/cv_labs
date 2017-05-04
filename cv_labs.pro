@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     scalespace.cpp \
     corner_detectors.cpp \
     descriptor.cpp \
-    ransac.cpp
+    ransac.cpp \
+    haugh.cpp
 
 HEADERS  += mainwindow.h \
     kernel.h \
@@ -33,6 +34,7 @@ HEADERS  += mainwindow.h \
     scalespace.h \
     corner_detectors.h \
     descriptor.h \
-    ransac.h
+    ransac.h \
+    haugh.h
 
 FORMS    += mainwindow.ui

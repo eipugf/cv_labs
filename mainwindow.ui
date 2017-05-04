@@ -64,6 +64,7 @@
      <string>Трансформации</string>
     </property>
     <addaction name="computeRansac"/>
+    <addaction name="actionHough"/>
    </widget>
    <addaction name="menu"/>
    <addaction name="menu_2"/>
@@ -142,6 +143,11 @@
   <action name="computeRansac">
    <property name="text">
     <string>RANSAC</string>
+   </property>
+  </action>
+  <action name="actionHough">
+   <property name="text">
+    <string>HOUGH</string>
    </property>
   </action>
  </widget>
